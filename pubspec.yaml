@@ -11,8 +11,17 @@ dependencies:
   dart_jsonwebtoken: ^2.13.0
   convert: ^3.1.1
   bip32_ed25519: ^0.5.0
-  jose_plus: ^0.4.6
-
+  jwk: ^0.2.3
+  crypto_keys_plus: ^0.4.0
+  meta: ^1.1.6
+  typed_data: ^1.0.0
+  x509_plus: ^0.3.1
+  http: ">=0.13.0 <2.0.0"
+  http_parser: ^4.0.0
+  asn1lib: ^1.0.0
+  collection: ^1.14.13
+  clock: ^1.1.1
+  
 dev_dependencies:
   lints: ^3.0.0
   test: ^1.24.0

@@ -23,7 +23,7 @@ void main() {
 
   test("Should decode JWS", () {
     String token =
-        "eyJ0eXAiOiJKV1QiLCJhbGciOiJFZERTQSJ9.SGVsbG8sIFdvcmxkIQ._Avrc6S_YNqLLtCj3u6SvB2-vrv_QHp4BgAk8w6hnXMFS6R3EZ4EauoCv2rsp1Xqo5U-qss-qF0SMWFEloI9Dg";
+        "eyJ0eXAiOiJKV00iLCJhbGciOiJFZERTQSJ9.SGVsbG8sIFdvcmxkIQ.Si_Np1PQeXH7j7L346NfGlNy0QIm1_ikeXUB8_nShaWhkLhKFrVORDGkli0nrr0ccVMbtqN6mufNoaLU8wi7BA";
     var payload = decodeJWS(token);
     expect(payload, equals("Hello, World!"));
   });

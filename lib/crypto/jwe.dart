@@ -1,10 +1,17 @@
-import "package:jose_plus/jose.dart";
+import "package:infra_did_comm_dart/crypto/jose_plus/jwe.dart";
+import "package:infra_did_comm_dart/crypto/jose_plus/jwk.dart";
+import "package:jwk/jwk.dart";
 
-String encryptJWE(String data, JsonWebKey key) {
+String encryptJWE(String data, JsonWebKey key, {Jwk? epk}) {
   var builder = JsonWebEncryptionBuilder();
   builder.stringContent = data;
 
-  builder.addRecipient(key, algorithm: "dir");
+  if (epk != null) {
+    builder.addRecipient(key, algorithm: "ECDH-ES");
+    builder.setProtectedHeader("epk", epk.toJson());
+  } else {
+    builder.addRecipient(key, algorithm: "dir");
+  }
 
   builder.encryptionAlgorithm = "A256GCM";
 
