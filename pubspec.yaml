@@ -8,6 +8,10 @@ environment:
 
 dependencies:
   uuid: ^4.3.2
+  dart_jsonwebtoken: ^2.13.0
+  convert: ^3.1.1
+  bip32_ed25519: ^0.5.0
+  jose_plus: ^0.4.6
 
 dev_dependencies:
   lints: ^3.0.0

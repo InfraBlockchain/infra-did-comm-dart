@@ -1,4 +1,4 @@
-import "package:infra_did_comm_dart/commons/context.dart";
+import "package:infra_did_comm_dart/messages/commons/context.dart";
 
 class DIDAuthFailedMessage {
   String id;

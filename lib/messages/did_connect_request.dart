@@ -1,5 +1,5 @@
-import "package:infra_did_comm_dart/commons/context.dart";
-import "package:infra_did_comm_dart/commons/initiator.dart";
+import "package:infra_did_comm_dart/messages/commons/context.dart";
+import "package:infra_did_comm_dart/messages/commons/initiator.dart";
 import "package:infra_did_comm_dart/types/types.dart";
 import "package:infra_did_comm_dart/utils/utils.dart";
 
