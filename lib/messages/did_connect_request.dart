@@ -1,6 +1,3 @@
-import "dart:convert";
-import "dart:io";
-
 import "package:infra_did_comm_dart/commons/context.dart";
 import "package:infra_did_comm_dart/commons/initiator.dart";
 import "package:infra_did_comm_dart/types/types.dart";
@@ -9,15 +6,15 @@ import "package:infra_did_comm_dart/utils/utils.dart";
 class DIDConnectRequestMessage {
   String type = "DIDConnectReq";
   String from;
-  int createdTime;
-  int expiresTime;
+  int? createdTime;
+  int? expiresTime;
   Context context;
   Initiator initiator;
 
   DIDConnectRequestMessage({
     required this.from,
-    required this.createdTime,
-    required this.expiresTime,
+    this.createdTime,
+    this.expiresTime,
     required this.context,
     required this.initiator,
   }) {

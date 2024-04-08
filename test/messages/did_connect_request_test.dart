@@ -280,6 +280,7 @@ void main() {
     final didConnectRequestMessage = DIDConnectRequestMessage.decode(encoded);
     expect(didConnectRequestMessage.toJson(), equals(message));
   });
+
   test("Should decode compact encoded DID-Connect-Request Message", () {
     String compactEncoded =
         "eJxdj0FvgzAMhf-LzwxKoNWWY4vQphzWgqqhXRBNTJtVhECslarivy9st10s2c9-7_MD6G4ROGRv2a43BiUVOEAA7dh3fqy04tq0Y8NXMd8ft7WI62eBeXUU2-LlKqlLsGkdo_MgkmqSgzOvVFh2_SpVm-WlSab0JLyfHLEhVDXpzsfFmw1L0zhlqwBwsnpE909J1gGcenUH_gC9FLdQXois41F0cy78xfJ8oe69v9PK6zGL9pekrL6rT7H7OOS9vr2vDxZmD7CYLDsW6UmHBslfNb6Xf2_DPM8_6dlVtw==";
