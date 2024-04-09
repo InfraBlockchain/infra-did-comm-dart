@@ -24,6 +24,7 @@ dependencies:
   substrate_bip39: ^0.4.0
   polkadart_keyring: ^0.4.3
   cryptography: ^2.7.0
+  pinenacl: ^0.5.1
 
 dev_dependencies:
   lints: ^3.0.0

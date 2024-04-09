@@ -13,8 +13,11 @@ Future<void> main() async {
   String bobSeed =
       "bamboo absorb chief dog box envelope leisure pink alone service spin more";
   List<int> bobPrivatekey = await privateKeyFromUri(bobSeed);
+  List<int> bobPublicKey = await publicKeyFromUri(bobSeed);
   Map<String, dynamic> bobX25519JwkPrivateKey =
-      await x25519JwkFromX25519PrivateKey(bobPrivatekey);
+      await x25519JwkFromEd25519PrivateKey(bobPrivatekey);
+  Map<String, dynamic> bobX25519JwkPublicKey =
+      x25519JwkFromEd25519PublicKey(bobPublicKey);
 
   // Alice make ephemeral keypair
   final ephemeralKeyPair = await generateX25519EphemeralKeyPair();
@@ -24,7 +27,9 @@ Future<void> main() async {
   // Alice make shared key with ephmeral private key and bob's public key
   // Need to publicKeyfromX25519Jwk(bobX25519JwkPrivateKey) << get from Resolver
   List<int> sharedKey1 = await makeSharedKey(
-      ephemeralPrivateKey, publicKeyfromX25519Jwk(bobX25519JwkPrivateKey));
+    ephemeralPrivateKey,
+    publicKeyfromX25519Jwk(bobX25519JwkPublicKey),
+  );
 
   print("Alice make shared key1: ${hex.encode(sharedKey1)}");
 
