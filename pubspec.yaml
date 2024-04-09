@@ -4,11 +4,27 @@ version: 0.0.1
 repository: https://github.com/InfraBlockchain/infra-did-comm-dart
 
 environment:
-  sdk: ^3.3.3
+  sdk: ">=3.0.1 <4.0.0"
 
-# Add regular dependencies here.
 dependencies:
-  # path: ^1.8.0
+  uuid: ^4.3.2
+  dart_jsonwebtoken: ^2.13.0
+  convert: ^3.1.1
+  jwk: ^0.2.3
+  crypto_keys_plus: ^0.4.0
+  meta: ^1.1.6
+  typed_data: ^1.0.0
+  x509_plus: ^0.3.1
+  http: ">=0.13.0 <2.0.0"
+  http_parser: ^4.0.0
+  asn1lib: ^1.0.0
+  collection: ^1.14.13
+  clock: ^1.1.1
+  substrate_bip39: ^0.4.0
+  polkadart_keyring: ^0.4.3
+  cryptography: ^2.7.0
+  pinenacl: ^0.5.1
+  socket_io_client: ^2.0.3+1
 
 dev_dependencies:
   lints: ^3.0.0
