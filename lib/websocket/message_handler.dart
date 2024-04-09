@@ -43,8 +43,8 @@ Future<void> messageHandler(
       List<int> privatekey = await privateKeyFromUri(mnemonic);
       Map<String, dynamic> x25519JwkPrivateKey =
           await x25519JwkFromEd25519PrivateKey(privatekey);
-      if (client.didList.isNotEmpty) {
-        String? fromDID = client.didList[0]["did"];
+      if (client.peerInfo.isNotEmpty) {
+        String? fromDID = client.peerInfo[0]["did"];
         String fromAddress = fromDID!.split(":").last;
         List<int> fromPublicKey = publicKeyFromAddress(fromAddress);
         Map<String, dynamic> x25519JwkPublicKey =
@@ -63,12 +63,20 @@ Future<void> messageHandler(
         }
         if (jwsPayload["type"] == "DIDConnected") {
           print("DIDConnected Message Received");
+          client.isConnected = true;
           if (connectedCallback != null) connectedCallback();
+        }
+        if(jwsPayload["type"] == "DIDAuthFailed") {
+          client.peerInfo.clear();
+          print("DIDAuthFailed Message Received");
+          client.socket.disconnect();
         }
       }
     }
   } catch (e) {
+    client.peerInfo.clear();
     sendDIDAuthFailedMessage(mnemonic, did, client);
+    client.socket.disconnect();
   }
 }
 
@@ -85,7 +93,7 @@ Future<String> makeDIDAuthInitMessage(
 
   String receiverAddress = receiverDID.split(":").last;
   List<int> receiverPublicKey = publicKeyFromAddress(receiverAddress);
-  client.didList.add({"did": message.from, "socketId": message.peerSocketId});
+  client.peerInfo.add({"did": message.from, "socketId": message.peerSocketId});
   String jws = signJWS(stringMessage, hex.encode(extendedPrivatekey));
 
   final ephemeralKeyPair = await generateX25519EphemeralKeyPair();
@@ -208,9 +216,9 @@ Future<void> sendDIDAuthFailedMessage(
   int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
   var uuid = Uuid();
   var id = uuid.v4();
-  if (client.didList.isNotEmpty) {
-    String? receiverDID = client.didList[0]["did"];
-    String? receiverSocketId = client.didList[0]["socketId"];
+  if (client.peerInfo.isNotEmpty) {
+    String? receiverDID = client.peerInfo[0]["did"];
+    String? receiverSocketId = client.peerInfo[0]["socketId"];
     DIDAuthFailedMessage didAuthFailedMessage = DIDAuthFailedMessage(
       id: id,
       from: did,

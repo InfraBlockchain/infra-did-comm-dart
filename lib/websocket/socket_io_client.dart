@@ -6,7 +6,8 @@ import "package:socket_io_client/socket_io_client.dart" as IO;
 
 class InfraDIDCommSocketClient {
   late IO.Socket socket;
-  List<Map<String, String>> didList = [];
+  List<Map<String, String>> peerInfo = [];// List of peers' info {did, socketId}
+  bool isConnected = false;
 
   final Completer<String?> _socketIdCompleter = Completer();
   Future<String?> get socketId => _socketIdCompleter.future;
