@@ -63,7 +63,6 @@ Map<String, dynamic> x25519JwkFromEd25519PublicKey(
     "crv": "X25519",
     "x": base64Url.encode(x25519Pk),
   };
-  print(jwk);
   return jwk;
 }
 
@@ -84,7 +83,6 @@ Future<Map<String, dynamic>> x25519JwkFromEd25519PrivateKey(
     "x": base64Url.encode(x25519Pk),
     "d": base64Url.encode(x25519Sk),
   };
-  print(jwk);
   return jwk;
 }
 

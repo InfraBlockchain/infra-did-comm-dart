@@ -31,30 +31,6 @@ class DIDAuthInitMessage {
     peerSocketId = peerSocketId;
   }
 
-  factory DIDAuthInitMessage.fromJson(Map<String, dynamic> json) {
-    try {
-      if (json.containsKey("type") && json["type"] != "DIDAuthInit") {
-        throw Exception("Invalid type");
-      }
-      return DIDAuthInitMessage(
-        id: json["id"],
-        from: json["from"],
-        to: json["to"],
-        createdTime:
-            json.containsKey("created_time") ? json["created_time"] : 0,
-        expiresTime:
-            json.containsKey("expires_time") ? json["expires_time"] : 0,
-        context: json["body"].containsKey("context")
-            ? Context.fromJson(json["body"]["context"])
-            : Context.fromCompactJson(json["body"]["c"]),
-        socketId: json["body"]["socketId"],
-        peerSocketId: json["body"]["peerSocketId"],
-      );
-    } catch (e) {
-      rethrow;
-    }
-  }
-
   Map<String, dynamic> toJson() {
     try {
       final Map<String, dynamic> data = {};
@@ -66,7 +42,7 @@ class DIDAuthInitMessage {
       if (expiresTime != null) data["expires_time"] = expiresTime;
       data["body"] = {
         "context": context.toJson(),
-        "socketid": socketId,
+        "socketId": socketId,
         "peerSocketId": peerSocketId,
       };
       return data;
