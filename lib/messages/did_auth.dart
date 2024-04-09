@@ -31,6 +31,32 @@ class DIDAuthMessage {
     peerSocketId = peerSocketId;
   }
 
+  factory DIDAuthMessage.fromJson(Map<String, dynamic> json) {
+    try {
+      if (json.containsKey("type") && json["type"] != "DIDAuth") {
+        throw Exception("Invalid type");
+      }
+      return DIDAuthMessage(
+        id: json["id"],
+        from: json["from"],
+        to: json["to"],
+        createdTime:
+            json.containsKey("created_time") ? json["created_time"] : 0,
+        expiresTime:
+            json.containsKey("expires_time") ? json["expires_time"] : 0,
+        context: json["body"].containsKey("context")
+            ? Context.fromJson(json["body"]["context"])
+            : Context.fromCompactJson(json["body"]["c"]),
+        socketId: json["body"].containsKey("socketId")
+            ? json["body"]["socketId"]
+            : null,
+        peerSocketId: json["body"]["peerSocketId"],
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Map<String, dynamic> toJson() {
     try {
       final Map<String, dynamic> data = {};

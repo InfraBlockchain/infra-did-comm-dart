@@ -11,3 +11,6 @@ export "./messages/did_connected.dart";
 
 export "crypto/jwe.dart";
 export "crypto/jws.dart";
+export "utils/encode.dart";
+export "utils/key.dart";
+export "utils/key_convert.dart";

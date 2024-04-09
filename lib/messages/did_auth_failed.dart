@@ -28,6 +28,29 @@ class DIDAuthFailedMessage {
     reason = reason;
   }
 
+  factory DIDAuthFailedMessage.fromJson(Map<String, dynamic> json) {
+    try {
+      if (json.containsKey("type") && json["type"] != "DIDAuthFailed") {
+        throw Exception("Invalid type");
+      }
+      return DIDAuthFailedMessage(
+        id: json["id"],
+        from: json["from"],
+        to: json["to"],
+        createdTime:
+            json.containsKey("created_time") ? json["created_time"] : 0,
+        expiresTime:
+            json.containsKey("expires_time") ? json["expires_time"] : 0,
+        context: json["body"].containsKey("context")
+            ? Context.fromJson(json["body"]["context"])
+            : Context.fromCompactJson(json["body"]["c"]),
+        reason: json["body"]["reason"],
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Map<String, dynamic> toJson() {
     try {
       final Map<String, dynamic> data = {};
