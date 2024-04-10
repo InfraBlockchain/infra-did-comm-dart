@@ -16,7 +16,7 @@ void main() {
       from: "f",
       to: ["t"],
       createdTime: currentTime,
-      expiresTime: currentTime + 1000,
+      expiresTime: currentTime + 30000,
       context: context,
       status: "status",
     );
@@ -25,7 +25,7 @@ void main() {
     expect(didConnectedMessage.from, "f");
     expect(didConnectedMessage.to, ["t"]);
     expect(didConnectedMessage.createdTime, currentTime);
-    expect(didConnectedMessage.expiresTime, currentTime + 1000);
+    expect(didConnectedMessage.expiresTime, currentTime + 30000);
     expect(didConnectedMessage.context.domain, "d");
     expect(didConnectedMessage.context.action, "a");
     expect(didConnectedMessage.status, "status");

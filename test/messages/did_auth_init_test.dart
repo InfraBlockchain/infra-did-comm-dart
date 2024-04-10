@@ -16,7 +16,7 @@ void main() {
       from: "f",
       to: ["t"],
       createdTime: currentTime,
-      expiresTime: currentTime + 1000,
+      expiresTime: currentTime + 30000,
       context: context,
       socketId: "socketId",
       peerSocketId: "peerSocketId",
@@ -26,7 +26,7 @@ void main() {
     expect(didAuthInitMessage.from, "f");
     expect(didAuthInitMessage.to, ["t"]);
     expect(didAuthInitMessage.createdTime, currentTime);
-    expect(didAuthInitMessage.expiresTime, currentTime + 1000);
+    expect(didAuthInitMessage.expiresTime, currentTime + 30000);
     expect(didAuthInitMessage.context.domain, "d");
     expect(didAuthInitMessage.context.action, "a");
     expect(didAuthInitMessage.socketId, "socketId");
