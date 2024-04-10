@@ -19,13 +19,13 @@ void main() {
         DIDConnectRequestMessage(
       from: "f",
       createdTime: currentTime,
-      expiresTime: currentTime + 1000,
+      expiresTime: currentTime + 30000,
       context: context,
       initiator: initiator,
     );
     expect(didConnectRequestMessage.from, "f");
     expect(didConnectRequestMessage.createdTime, currentTime);
-    expect(didConnectRequestMessage.expiresTime, currentTime + 1000);
+    expect(didConnectRequestMessage.expiresTime, currentTime + 30000);
     expect(didConnectRequestMessage.context.domain, "d");
     expect(didConnectRequestMessage.context.action, "a");
   });

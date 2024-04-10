@@ -16,7 +16,7 @@ void main() {
       from: "f",
       to: ["t"],
       createdTime: currentTime,
-      expiresTime: currentTime + 1000,
+      expiresTime: currentTime + 30000,
       context: context,
       reason: "reason",
     );
@@ -25,7 +25,7 @@ void main() {
     expect(didAuthFailedMessage.from, "f");
     expect(didAuthFailedMessage.to, ["t"]);
     expect(didAuthFailedMessage.createdTime, currentTime);
-    expect(didAuthFailedMessage.expiresTime, currentTime + 1000);
+    expect(didAuthFailedMessage.expiresTime, currentTime + 30000);
     expect(didAuthFailedMessage.context.domain, "d");
     expect(didAuthFailedMessage.context.action, "a");
     expect(didAuthFailedMessage.reason, "reason");

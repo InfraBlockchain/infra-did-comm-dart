@@ -43,8 +43,8 @@ Future<void> messageHandler(
       List<int> privatekey = await privateKeyFromUri(mnemonic);
       Map<String, dynamic> x25519JwkPrivateKey =
           await x25519JwkFromEd25519PrivateKey(privatekey);
-      if (client.peerInfo.isNotEmpty) {
-        String? fromDID = client.peerInfo[0]["did"];
+      if (client.peerInfo.containsKey("did")) {
+        String? fromDID = client.peerInfo["did"];
         String fromAddress = fromDID!.split(":").last;
         List<int> fromPublicKey = publicKeyFromAddress(fromAddress);
         Map<String, dynamic> x25519JwkPublicKey =
@@ -66,7 +66,7 @@ Future<void> messageHandler(
           client.isConnected = true;
           if (connectedCallback != null) connectedCallback();
         }
-        if(jwsPayload["type"] == "DIDAuthFailed") {
+        if (jwsPayload["type"] == "DIDAuthFailed") {
           client.peerInfo.clear();
           print("DIDAuthFailed Message Received");
           client.socket.disconnect();
@@ -93,7 +93,7 @@ Future<String> makeDIDAuthInitMessage(
 
   String receiverAddress = receiverDID.split(":").last;
   List<int> receiverPublicKey = publicKeyFromAddress(receiverAddress);
-  client.peerInfo.add({"did": message.from, "socketId": message.peerSocketId});
+  client.peerInfo = {"did": message.from, "socketId": message.peerSocketId};
   String jws = signJWS(stringMessage, hex.encode(extendedPrivatekey));
 
   final ephemeralKeyPair = await generateX25519EphemeralKeyPair();
@@ -131,7 +131,7 @@ Future<void> sendDIDAuthMessage(
     from: didAuthInitMessagePayload["to"][0],
     to: [receiverDID],
     createdTime: currentTime,
-    expiresTime: currentTime + 1000,
+    expiresTime: currentTime + 30000,
     context: Context.fromJson(didAuthInitMessagePayload["body"]["context"]),
     socketId: didAuthInitMessagePayload["body"]["peerSocketId"],
     peerSocketId: didAuthInitMessagePayload["body"]["socketId"],
@@ -174,7 +174,7 @@ Future<void> sendDIDConnectedMessage(
     from: didAuthMessagePayload["to"][0],
     to: [receiverDID],
     createdTime: currentTime,
-    expiresTime: currentTime + 1000,
+    expiresTime: currentTime + 30000,
     context: Context.fromJson(didAuthMessagePayload["body"]["context"]),
     status: "Successfully Connected",
   );
@@ -216,15 +216,15 @@ Future<void> sendDIDAuthFailedMessage(
   int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
   var uuid = Uuid();
   var id = uuid.v4();
-  if (client.peerInfo.isNotEmpty) {
-    String? receiverDID = client.peerInfo[0]["did"];
-    String? receiverSocketId = client.peerInfo[0]["socketId"];
+  if (client.peerInfo.containsKey("did")) {
+    String? receiverDID = client.peerInfo["did"];
+    String? receiverSocketId = client.peerInfo["socketId"];
     DIDAuthFailedMessage didAuthFailedMessage = DIDAuthFailedMessage(
       id: id,
       from: did,
       to: [receiverDID!],
       createdTime: currentTime,
-      expiresTime: currentTime + 1000,
+      expiresTime: currentTime + 30000,
       context: context ?? Context(domain: "Infra DID Comm", action: "connect"),
       reason: "DID Auth Failed",
     );

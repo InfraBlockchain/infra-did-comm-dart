@@ -30,7 +30,7 @@ main() async {
       from: did,
       to: [did],
       createdTime: currentTime,
-      expiresTime: currentTime + 1000,
+      expiresTime: currentTime + 30000,
       context: context,
       socketId: socketId,
       peerSocketId: toSocketId,
