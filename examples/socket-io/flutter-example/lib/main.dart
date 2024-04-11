@@ -33,15 +33,16 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  InfraDIDCommSocketClient client =
-      InfraDIDCommSocketClient("http://data-market.test.newnal.com:9000");
   String mnemonic =
       "bamboo absorb chief dog box envelope leisure pink alone service spin more";
   String did = "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z";
+  InfraDIDCommSocketClient client = InfraDIDCommSocketClient(
+      "http://data-market.test.newnal.com:9000",
+      did: "did",
+      mnemonic: "mnemonic");
 
   Future<void> connectWebsocket() async {
-    client.onConnect();
-    client.onMessage(mnemonic, did, null);
+    client.onMessage();
     client.connect();
     String? socketId = await client.socketId;
   }
@@ -55,28 +56,6 @@ class _MyHomePageState extends State<MyHomePage> {
     if (socketId != null) {
       String toSocketId = "O2kcsMxfKsh5gKFzAAFW"; // Need to set peer socketId
       int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-      Context context = Context(
-        domain: "d",
-        action: "a",
-      );
-      var uuid = const Uuid();
-      var id = uuid.v4();
-      DIDAuthInitMessage didAuthInitMessage = DIDAuthInitMessage(
-        id: id,
-        from: did,
-        to: [did],
-        createdTime: currentTime,
-        expiresTime: currentTime + 30000,
-        context: context,
-        socketId: socketId,
-        peerSocketId: toSocketId,
-      );
-
-      await client.sendDIDAuthInitMessage(
-        didAuthInitMessage,
-        mnemonic,
-        did,
-      );
     }
   }
 
