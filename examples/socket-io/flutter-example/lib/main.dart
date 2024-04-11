@@ -36,26 +36,51 @@ class _MyHomePageState extends State<MyHomePage> {
   String mnemonic =
       "bamboo absorb chief dog box envelope leisure pink alone service spin more";
   String did = "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z";
-  InfraDIDCommSocketClient client = InfraDIDCommSocketClient(
+  late InfraDIDCommSocketClient client;
+
+  void setClientWithHolderRole() {
+    client = InfraDIDCommSocketClient(
       "http://data-market.test.newnal.com:9000",
-      did: "did",
-      mnemonic: "mnemonic");
+      did: did,
+      mnemonic: mnemonic,
+      role: "HOLDER",
+    );
+  }
+
+  void setClientWirhVerifierRole() {
+    client = InfraDIDCommSocketClient(
+      "http://data-market.test.newnal.com:9000",
+      did: did,
+      mnemonic: mnemonic,
+      role: "VERIFIER",
+    );
+  }
 
   Future<void> connectWebsocket() async {
     client.onMessage();
     client.connect();
-    String? socketId = await client.socketId;
   }
 
   void disconnectWebsocket() {
     client.disconnect();
   }
 
-  Future<void> sendDIDAuthInitMessage() async {
+  Future<void> receiveEncodedConnectRequestMessage() async {
     String? socketId = await client.socketId;
     if (socketId != null) {
-      String toSocketId = "O2kcsMxfKsh5gKFzAAFW"; // Need to set peer socketId
-      int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      String peerSocketId = "QH0Y0ej-hx27D4DSAALY";
+      final minimalCompactJson = {
+        "from": "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
+        "body": {
+          "i": {"sid": peerSocketId},
+          "c": {"d": "pet-i.net", "a": "connect"},
+        },
+      };
+      final didConnectRequestMessage =
+          DIDConnectRequestMessage.fromJson(minimalCompactJson);
+
+      String encoded = didConnectRequestMessage.encode(CompressionLevel.json);
+      await client.sendDIDAuthInitMessage(encoded);
     }
   }
 
@@ -71,13 +96,19 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             ElevatedButton(
-                onPressed: connectWebsocket, child: const Text("Connect")),
+                onPressed: setClientWithHolderRole,
+                child: const Text("Set client Holder Role")),
+            ElevatedButton(
+                onPressed: setClientWirhVerifierRole,
+                child: const Text("Set client Verifier Role")),
+            ElevatedButton(
+                onPressed: connectWebsocket, child: const Text("wsConnect")),
             ElevatedButton(
                 onPressed: disconnectWebsocket,
-                child: const Text("Disconnect")),
+                child: const Text("wsDisconnect")),
             ElevatedButton(
-                onPressed: sendDIDAuthInitMessage,
-                child: const Text("Send DID-Auth-Init Message")),
+                onPressed: receiveEncodedConnectRequestMessage,
+                child: const Text("Receive encoded Connect Request Message")),
           ],
         ),
       ),

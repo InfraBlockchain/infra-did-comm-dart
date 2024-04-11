@@ -214,12 +214,21 @@ var payload = verifyJWS(token, publicKey);
 Check [example](./examples/socket-io) for more detail.
 
 ```dart
-  InfraDIDCommSocketClient client =
-      InfraDIDCommSocketClient("http://data-market.test.newnal.com:9000");
   String mnemonic =
       "bamboo absorb chief dog box envelope leisure pink alone service spin more";
   String did = "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z";
-  client.onConnect();
-  client.onMessage(mnemonic, did, connectedCallback);
+  InfraDIDCommSocketClient client = InfraDIDCommSocketClient(
+    "http://data-market.test.newnal.com:9000",
+    did: did,
+    mnemonic: mnemonic,
+    role: "HOLDER", // HOLDER or VERIFIER
+  );
+
+  client.setDIDAuthInitCallback(didAuthInitCallback);
+  client.setDIDAuthCallback(didAuthCallback);
+  client.setDIDConnectedCallback(didConnectedCallback);
+  client.setDIDAuthFailedCallback(didAuthFailedCallback);
+
+  client.onMessage();
   client.connect();
 ```
