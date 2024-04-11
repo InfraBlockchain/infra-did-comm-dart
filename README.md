@@ -31,13 +31,13 @@ Get more examples in [examples](./examples) and [test](./test) folder.
 ```dart
     int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     Context context = Context(
-      domain: "d",
-      action: "a",
+      domain: "some-domain",
+      action: "connect",
     );
     Initiator initiator = Initiator(
-      type: "t",
-      serviceEndpoint: "se",
-      socketId: "sid",
+      type: "HOLDER",
+      serviceEndpoint: "http://localhost:8000",
+      socketId: "3C9SxnIcgKlIvN00AAFm",
     );
 ```
 
@@ -46,20 +46,20 @@ Get more examples in [examples](./examples) and [test](./test) folder.
 ```dart
     int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     Context context = Context(
-      domain: "d",
-      action: "a",
+      domain: "some-domain",
+      action: "connect",
     );
     var uuid = Uuid();
     var id = uuid.v4();
     DIDAuthInitMessage didAuthInitMessage = DIDAuthInitMessage(
       id: id,
-      from: "f",
-      to: ["t"],
+      from: "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
+      to: ["did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z"],
       createdTime: currentTime,
       expiresTime: currentTime + 30000,
       context: context,
-      socketId: "socketId",
-      peerSocketId: "peerSocketId",
+      socketId: "3C9SxnIcgKlIvN00AAFm",
+      peerSocketId: "O2kcsMxfKsh5gKFzAAFW",
     );
 ```
 
@@ -68,20 +68,20 @@ Get more examples in [examples](./examples) and [test](./test) folder.
 ```dart
    int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     Context context = Context(
-      domain: "d",
-      action: "a",
+      domain: "some-domain",
+      action: "connect",
     );
     var uuid = Uuid();
     var id = uuid.v4();
     DIDAuthMessage didAuthMessage = DIDAuthMessage(
       id: id,
-      from: "f",
-      to: ["t"],
+      from: "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
+      to: ["did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z"],
       createdTime: currentTime,
       expiresTime: currentTime + 30000,
       context: context,
-      socketId: "socketId",
-      peerSocketId: "peerSocketId",
+      socketId: "3C9SxnIcgKlIvN00AAFm",
+      peerSocketId: "O2kcsMxfKsh5gKFzAAFW",
     );
 ```
 
@@ -90,19 +90,19 @@ Get more examples in [examples](./examples) and [test](./test) folder.
 ```dart
     int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     Context context = Context(
-      domain: "d",
-      action: "a",
+      domain: "some-domain",
+      action: "connect",
     );
     var uuid = Uuid();
     var id = uuid.v4();
     DIDConnectedMessage didConnectedMessage = DIDConnectedMessage(
       id: id,
-      from: "f",
-      to: ["t"],
+      from: "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
+      to: ["did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z"],
       createdTime: currentTime,
       expiresTime: currentTime + 30000,
       context: context,
-      status: "status",
+      status: "Connected",
     );
 ```
 
@@ -111,19 +111,19 @@ Get more examples in [examples](./examples) and [test](./test) folder.
 ```dart
     int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     Context context = Context(
-      domain: "d",
-      action: "a",
+      domain: "some-domain",
+      action: "connect",
     );
     var uuid = Uuid();
     var id = uuid.v4();
     DIDAuthFailedMessage didAuthFailedMessage = DIDAuthFailedMessage(
       id: id,
-      from: "f",
-      to: ["t"],
+      from: "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
+      to: ["did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z"],
       createdTime: currentTime,
       expiresTime: currentTime + 30000,
       context: context,
-      reason: "reason",
+      reason: "Invalid Signature",
     );
 ```
 
