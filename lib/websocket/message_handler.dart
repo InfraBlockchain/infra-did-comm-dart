@@ -37,11 +37,11 @@ Future<void> messageHandler(
       List<int> fromPublicKey = publicKeyFromAddress(fromAddress);
       Map<String, dynamic> jwsPayload =
           verifyJWS(jwsFromJwe, hex.encode(fromPublicKey));
-      print(jwsPayload);
       client.peerInfo = {
         "did": jwsPayload["from"],
         "socketId": jwsPayload["body"]["socketId"],
       };
+      client.isReceivedDIDAuthInit = true;
       // If Success, Send DID Auth Message
       sendDIDAuthMessage(mnemonic, jwsPayload, client.socket);
     }
@@ -75,7 +75,7 @@ Future<void> messageHandler(
         if (jwsPayload["type"] == "DIDConnected") {
           print("DIDConnected Message Received");
           if (didConnectedCallback != null) didConnectedCallback(fromDID);
-          client.isConnected = true;
+          client.isDIDConnected = true;
           if (client.role == "VERIFIER") {
             sendDIDConnectedMessageFromDIDConnectedMessage(
               mnemonic,

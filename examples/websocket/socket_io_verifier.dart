@@ -47,7 +47,7 @@ initiatedByHolderScenario() async {
 
   String? socketId = await client.socketId;
   if (socketId != null) {
-    String holderSocketId = "tDh94WFOolVYka_ZAALk";
+    String holderSocketId = "Sihuz9kg2cWz4gcdAAXz";
     final minimalCompactJson = {
       "from": "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
       "body": {

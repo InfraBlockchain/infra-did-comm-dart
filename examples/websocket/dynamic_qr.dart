@@ -22,8 +22,9 @@ main() async {
     "domain": "infraDID",
     "action": "connect",
   };
+  client.onMessage();
   final context = Context.fromJson(contextJson);
-  int loopTimeSeconds = 15;
+  int loopTimeSeconds = 30;
 
   makeDynamicQr(
     client,

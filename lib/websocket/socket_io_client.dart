@@ -11,9 +11,12 @@ class InfraDIDCommSocketClient {
   String mnemonic;
   String role = "HOLDER";
   String url = "";
+
   late IO.Socket socket;
   late Map<String, String> peerInfo = {}; // peers' info {did, socketId}
-  bool isConnected = false;
+
+  bool isDIDConnected = false;
+  bool isReceivedDIDAuthInit = false;
 
   late bool Function(String peerDID) didAuthInitCallback =
       (String peerDID) => true;
@@ -82,7 +85,8 @@ class InfraDIDCommSocketClient {
 
   disconnect() {
     peerInfo = {};
-    isConnected = false;
+    isDIDConnected = false;
+    isReceivedDIDAuthInit = false;
     socket.disconnect();
   }
 

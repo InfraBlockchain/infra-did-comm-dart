@@ -86,7 +86,7 @@ initiatedByVerifierScenario() async {
 
   String? socketId = await client.socketId;
   if (socketId != null) {
-    String verifierSocketId = "G_A98d1uN5zwvLBzAALq";
+    String verifierSocketId = "Wp6O6Tve6zEN35esAAXT";
     final minimalCompactJson = {
       "from": "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
       "body": {

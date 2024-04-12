@@ -9,6 +9,11 @@ Future<void> makeDynamicQr(
   Function(String encodedMessage) loopCallback,
 ) async {
   while (true) {
+    // Check if client is connected
+    if (client.isReceivedDIDAuthInit) {
+      break;
+    }
+
     // Connect or reconnect the client
     await Future.delayed(Duration(milliseconds: 100));
     await client.disconnect();
@@ -38,11 +43,6 @@ Future<void> makeDynamicQr(
         didConnectRequestMessage.encode(CompressionLevel.json);
 
     loopCallback(encodedMessage);
-
-    // Check if client is connected
-    if (client.isConnected) {
-      break;
-    }
 
     // Wait for the specified loop time
     await Future.delayed(Duration(seconds: loopTimeSeconds));
