@@ -40,7 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void setClientWithHolderRole() {
     client = InfraDIDCommSocketClient(
-      "http://data-market.test.newnal.com:9000",
+      url: "http://data-market.test.newnal.com:9000",
       did: did,
       mnemonic: mnemonic,
       role: "HOLDER",
@@ -49,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void setClientWirhVerifierRole() {
     client = InfraDIDCommSocketClient(
-      "http://data-market.test.newnal.com:9000",
+      url: "http://data-market.test.newnal.com:9000",
       did: did,
       mnemonic: mnemonic,
       role: "VERIFIER",

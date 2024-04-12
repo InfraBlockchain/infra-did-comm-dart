@@ -20,10 +20,10 @@ void didAuthFailedCallback(String peerDID) {
 
 main() async {
   // If you want to run the initiatedByHolderScenario, uncomment the line below
-  initiatedByHolderScenario();
+  // initiatedByHolderScenario();
 
   // If you want to run the initiatedByVerifierScenario, uncomment the line below
-  // initiatedByVerifierScenario();
+  initiatedByVerifierScenario();
 }
 
 initiatedByHolderScenario() async {
@@ -31,10 +31,10 @@ initiatedByHolderScenario() async {
       "bamboo absorb chief dog box envelope leisure pink alone service spin more";
   String did = "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z";
   InfraDIDCommSocketClient client = InfraDIDCommSocketClient(
-    "http://data-market.test.newnal.com:9000",
+    url: "http://data-market.test.newnal.com:9000",
     did: did,
     mnemonic: mnemonic,
-    role: "VERIFIER",
+    role: "HOLDER",
   );
 
   client.setDIDAuthInitCallback(didAuthInitCallback);
@@ -47,7 +47,7 @@ initiatedByHolderScenario() async {
 
   String? socketId = await client.socketId;
   if (socketId != null) {
-    String holderSocketId = "tDh94WFOolVYka_ZAALk";
+    String holderSocketId = socketId;
     final minimalCompactJson = {
       "from": "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
       "body": {
@@ -59,8 +59,7 @@ initiatedByHolderScenario() async {
         DIDConnectRequestMessage.fromJson(minimalCompactJson);
 
     String encoded = didConnectRequestMessage.encode(CompressionLevel.json);
-    print("Received encoded request message from holder: $encoded");
-    await client.sendDIDAuthInitMessage(encoded);
+    print("Holder make encoded request message: $encoded");
   } else {
     print("Socket ID is null");
   }
@@ -71,10 +70,10 @@ initiatedByVerifierScenario() async {
       "bamboo absorb chief dog box envelope leisure pink alone service spin more";
   String did = "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z";
   InfraDIDCommSocketClient client = InfraDIDCommSocketClient(
-    "http://data-market.test.newnal.com:9000",
+    url: "http://data-market.test.newnal.com:9000",
     did: did,
     mnemonic: mnemonic,
-    role: "VERIFIER",
+    role: "HOLDER",
   );
 
   client.setDIDAuthInitCallback(didAuthInitCallback);
@@ -87,7 +86,7 @@ initiatedByVerifierScenario() async {
 
   String? socketId = await client.socketId;
   if (socketId != null) {
-    String verifierSocketId = socketId;
+    String verifierSocketId = "G_A98d1uN5zwvLBzAALq";
     final minimalCompactJson = {
       "from": "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
       "body": {
@@ -99,7 +98,8 @@ initiatedByVerifierScenario() async {
         DIDConnectRequestMessage.fromJson(minimalCompactJson);
 
     String encoded = didConnectRequestMessage.encode(CompressionLevel.json);
-    print("Verifier make encoded request message: $encoded");
+    print("Received encoded request message from verifier: $encoded");
+    await client.sendDIDAuthInitMessage(encoded);
   } else {
     print("Socket ID is null");
   }

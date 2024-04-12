@@ -1,6 +1,5 @@
 import "dart:async";
 
-import "package:infra_did_comm_dart/messages/did_auth_init.dart";
 import "package:infra_did_comm_dart/websocket/message_handler.dart";
 import "package:socket_io_client/socket_io_client.dart" as IO;
 import "package:uuid/uuid.dart";
@@ -11,24 +10,27 @@ class InfraDIDCommSocketClient {
   String did;
   String mnemonic;
   String role = "HOLDER";
+  String url = "";
   late IO.Socket socket;
   late Map<String, String> peerInfo = {}; // peers' info {did, socketId}
   bool isConnected = false;
+
   late bool Function(String peerDID) didAuthInitCallback =
       (String peerDID) => true;
   late bool Function(String peerDID) didAuthCallback = (String peerDID) => true;
   late Function(String peerDID) didConnectedCallback = (String peerDID) {};
   late Function(String peerDID) didAuthFailedCallback = (String peerDID) {};
 
-  final Completer<String?> _socketIdCompleter = Completer();
+  Completer<String?> _socketIdCompleter = Completer();
   Future<String?> get socketId => _socketIdCompleter.future;
 
-  InfraDIDCommSocketClient(
-    String url, {
+  InfraDIDCommSocketClient({
+    required this.url,
     required this.did,
     required this.mnemonic,
     required this.role,
   }) {
+    url = url;
     did = did;
     mnemonic = mnemonic;
     if (role == "HOLDER" || role == "VERIFIER") {
@@ -44,13 +46,18 @@ class InfraDIDCommSocketClient {
           .build(),
     );
     socket.on("connection", (data) {
-      _socketIdCompleter.complete(socket.id);
       print("Socket ID: ${socket.id}");
     });
     socket.onConnect((_) {
+      _socketIdCompleter.complete(socket.id);
       print("Socket connected");
     });
-    socket.onDisconnect((_) => print("Socket disconnected"));
+    socket.onDisconnect(
+      (_) => {
+        _socketIdCompleter = Completer(),
+        print("Socket disconnected"),
+      },
+    );
   }
 
   void setDIDAuthInitCallback(bool Function(String peerDID) callback) {
@@ -69,11 +76,11 @@ class InfraDIDCommSocketClient {
     didAuthFailedCallback = callback;
   }
 
-  void connect() {
+  connect() {
     socket.connect();
   }
 
-  void disconnect() {
+  disconnect() {
     peerInfo = {};
     isConnected = false;
     socket.disconnect();
@@ -92,7 +99,7 @@ class InfraDIDCommSocketClient {
           didAuthCallback,
           didConnectedCallback,
           didAuthFailedCallback,
-        )
+        ),
       },
     );
   }
