@@ -13,7 +13,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   infra_did_comm_dart:
     path: ../../../
-  uuid: ^4.3.2
+  uuid: ^3.0.6
 
 dev_dependencies:
   flutter_test:

@@ -6,8 +6,8 @@ import "package:infra_did_comm_dart/utils/encode.dart";
 class DIDConnectRequestMessage {
   String type = "DIDConnectReq";
   String from;
-  int? createdTime;
-  int? expiresTime;
+  int? createdTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+  int? expiresTime = DateTime.now().millisecondsSinceEpoch ~/ 1000 + 30000;
   Context context;
   Initiator initiator;
 
