@@ -26,7 +26,7 @@ main() async {
   final context = Context.fromJson(contextJson);
   int loopTimeSeconds = 30;
 
-  makeDynamicQr(
+  didConnectRequestLoop(
     client,
     context,
     loopTimeSeconds,
