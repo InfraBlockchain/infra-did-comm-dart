@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:infra_did_comm_dart/infra_did_comm_dart.dart';
-import 'package:uuid/uuid.dart';
+import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 void main() {
   runApp(const MyApp());
@@ -38,6 +39,17 @@ class _MyHomePageState extends State<MyHomePage> {
   String did = "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z";
   late InfraDIDCommSocketClient client;
 
+  late QRViewController controller;
+  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  DateTime? lastScan;
+  bool didConnected = false; // 연결 여부를 나타내는 상태 변수
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
   void setClientWithHolderRole() {
     client = InfraDIDCommSocketClient(
       url: "http://data-market.test.newnal.com:9000",
@@ -45,19 +57,32 @@ class _MyHomePageState extends State<MyHomePage> {
       mnemonic: mnemonic,
       role: "HOLDER",
     );
+    client.onMessage();
+    client.didConnectedCallback = (String peerDID) {
+      print("DID connected: $peerDID");
+      setState(() {
+        didConnected = true; // 연결되었음을 상태에 반영
+      });
+    };
   }
 
-  void setClientWirhVerifierRole() {
+  void setClientWithVerifierRole() {
     client = InfraDIDCommSocketClient(
       url: "http://data-market.test.newnal.com:9000",
       did: did,
       mnemonic: mnemonic,
       role: "VERIFIER",
     );
+    client.onMessage();
+    client.didConnectedCallback = (String peerDID) {
+      print("DID connected: $peerDID");
+      setState(() {
+        didConnected = true; // 연결되었음을 상태에 반영
+      });
+    };
   }
 
   Future<void> connectWebsocket() async {
-    client.onMessage();
     client.connect();
   }
 
@@ -86,6 +111,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (didConnected) {
+      WidgetsBinding.instance!.addPostFrameCallback((_) {
+        showModal(context);
+      });
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -99,7 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: setClientWithHolderRole,
                 child: const Text("Set client Holder Role")),
             ElevatedButton(
-                onPressed: setClientWirhVerifierRole,
+                onPressed: setClientWithVerifierRole,
                 child: const Text("Set client Verifier Role")),
             ElevatedButton(
                 onPressed: connectWebsocket, child: const Text("wsConnect")),
@@ -109,14 +139,165 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
                 onPressed: receiveEncodedConnectRequestMessage,
                 child: const Text("Receive encoded Connect Request Message")),
+            ElevatedButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return const QRCodeModal(); // 모달 창 표시
+                  },
+                );
+              },
+              child: const Text("Show QR Code"),
+            ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: connectWebsocket,
-        tooltip: 'connect websocket',
-        child: const Icon(Icons.connect_without_contact),
+        tooltip: 'QR code scan',
+        onPressed: () async {
+          await qrScanOnPressed();
+        },
+        child: const Icon(Icons.qr_code_scanner),
       ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+
+  void showModal(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("DID Connected"),
+          content: Text("DID connected successfully!"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                client.disconnect();
+                Navigator.of(context).pop(); // 모달 닫기
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> qrScanOnPressed() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Scaffold(
+          body: Stack(
+            children: [
+              QRView(
+                key: qrKey,
+                onQRViewCreated: _onQRViewCreated,
+              ),
+              Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      client.disconnect();
+                      Navigator.pop(context); // 뒤로가기 버튼
+                    },
+                    tooltip: '뒤로가기',
+                    child: Icon(Icons.arrow_back),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _onQRViewCreated(QRViewController controller) {
+    this.controller = controller;
+
+    controller.scannedDataStream.listen((scanData) {
+      final currentScan = DateTime.now();
+      if (lastScan == null ||
+          currentScan.difference(lastScan!) > const Duration(seconds: 1)) {
+        lastScan = currentScan;
+        String data = scanData.code!;
+        print(data);
+        client.sendDIDAuthInitMessage(data);
+      }
+    });
+  }
+}
+
+class QRCodeModal extends StatefulWidget {
+  const QRCodeModal({super.key});
+
+  @override
+  // ignore: library_private_types_in_public_api
+  _QRCodeModalState createState() => _QRCodeModalState();
+}
+
+class _QRCodeModalState extends State<QRCodeModal> {
+  late InfraDIDCommSocketClient client;
+  String encode = "";
+
+  void showQR() {
+    client = InfraDIDCommSocketClient(
+      url: "http://data-market.test.newnal.com:9000",
+      did: "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
+      mnemonic:
+          "bamboo absorb chief dog box envelope leisure pink alone service spin more",
+      role: "HOLDER",
+    );
+    Context context = Context(
+      domain: "infra-did-comm",
+      action: "connect",
+    );
+    makeDynamicQr(
+        client,
+        context,
+        15,
+        (encodedMessage) => {
+              setState(() {
+                encode = encodedMessage;
+              })
+            });
+    return;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text("QR Code"),
+      content: Container(
+          height: 320,
+          width: 320,
+          child: encode == ""
+              ? const Text("")
+              : QrImageView(
+                  data: encode,
+                  version: QrVersions.auto,
+                  size: 320,
+                  gapless: false,
+                )),
+      actions: [
+        ElevatedButton(
+          onPressed: () {
+            showQR();
+          },
+          child: const Text("QR Code generate"),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            client.disconnect();
+            Navigator.of(context).pop();
+          },
+          child: const Text("닫기"),
+        ),
+      ],
     );
   }
 }
