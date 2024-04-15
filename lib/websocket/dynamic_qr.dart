@@ -2,7 +2,7 @@ import "dart:async";
 
 import "package:infra_did_comm_dart/infra_did_comm_dart.dart";
 
-Future<void> makeDynamicQr(
+Future<void> didConnectRequestLoop(
   InfraDIDCommSocketClient client,
   Context context,
   int loopTimeSeconds,

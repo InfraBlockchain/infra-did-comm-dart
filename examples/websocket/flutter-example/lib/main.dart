@@ -256,7 +256,7 @@ class _QRCodeModalState extends State<QRCodeModal> {
       domain: "infra-did-comm",
       action: "connect",
     );
-    makeDynamicQr(
+    didConnectRequestLoop(
         client,
         context,
         15,
