@@ -88,7 +88,7 @@ class InfraDIDCommSocketClient {
   disconnect() {
     peerInfo = {};
     isDIDConnected = false;
-    isReceivedDIDAuthInit = true;
+    isReceivedDIDAuthInit = false;
     socket.disconnect();
   }
 

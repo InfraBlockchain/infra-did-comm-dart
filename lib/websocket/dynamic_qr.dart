@@ -8,12 +8,10 @@ Future<void> didConnectRequestLoop(
   int loopTimeSeconds,
   Function(String encodedMessage) loopCallback,
 ) async {
-  while (true) {
-    // Check if client is connected
-    if (client.isReceivedDIDAuthInit) {
-      break;
-    }
+  // Disconnect the websocket client
+  await client.disconnect();
 
+  while (!client.isReceivedDIDAuthInit) {
     // Connect or reconnect the client
     await Future.delayed(Duration(milliseconds: 100));
     await client.disconnect();
