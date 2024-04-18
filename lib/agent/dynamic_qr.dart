@@ -3,34 +3,34 @@ import "dart:async";
 import "package:infra_did_comm_dart/infra_did_comm_dart.dart";
 
 Future<void> didConnectRequestLoop(
-  InfraDIDCommSocketClient client,
+  InfraDIDCommAgent agent,
   Context context,
   int loopTimeSeconds,
   Function(String encodedMessage) loopCallback,
 ) async {
   // Disconnect the websocket client
-  await client.disconnect();
+  await agent.disconnect();
 
-  while (!client.isReceivedDIDAuthInit) {
+  while (!agent.isReceivedDIDAuthInit) {
     // Connect or reconnect the client
     await Future.delayed(Duration(milliseconds: 100));
-    await client.disconnect();
+    await agent.disconnect();
     await Future.delayed(Duration(milliseconds: 100));
-    await client.connect();
+    await agent.connect();
 
     int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     await Future.delayed(Duration(milliseconds: 500));
-    String socketId = (await client.socketId)!;
+    String socketId = (await agent.socketId)!;
 
     Initiator initiator = Initiator(
-      type: client.role,
-      serviceEndpoint: client.url,
+      type: agent.role,
+      serviceEndpoint: agent.url,
       socketId: socketId,
     );
 
     DIDConnectRequestMessage didConnectRequestMessage =
         DIDConnectRequestMessage(
-      from: client.did,
+      from: agent.did,
       createdTime: currentTime,
       expiresTime: currentTime + loopTimeSeconds,
       context: context,

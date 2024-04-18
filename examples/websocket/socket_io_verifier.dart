@@ -1,10 +1,5 @@
 import "package:infra_did_comm_dart/infra_did_comm_dart.dart";
 
-bool didAuthInitCallback(String peerDID) {
-  print("DID Auth Init Callback");
-  return true;
-}
-
 bool didAuthCallback(String peerDID) {
   print("DID Auth Callback");
   return true;
@@ -30,22 +25,20 @@ initiatedByHolderScenario() async {
   String mnemonic =
       "bamboo absorb chief dog box envelope leisure pink alone service spin more";
   String did = "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z";
-  InfraDIDCommSocketClient client = InfraDIDCommSocketClient(
+  InfraDIDCommAgent agent = InfraDIDCommAgent(
     url: "http://data-market.test.newnal.com:9000",
     did: did,
     mnemonic: mnemonic,
     role: "VERIFIER",
   );
 
-  client.setDIDAuthInitCallback(didAuthInitCallback);
-  client.setDIDAuthCallback(didAuthCallback);
-  client.setDIDConnectedCallback(didConnectedCallback);
-  client.setDIDAuthFailedCallback(didAuthFailedCallback);
+  agent.setDIDAuthCallback(didAuthCallback);
+  agent.setDIDConnectedCallback(didConnectedCallback);
+  agent.setDIDAuthFailedCallback(didAuthFailedCallback);
 
-  client.onMessage();
-  client.connect();
+  agent.init();
 
-  String? socketId = await client.socketId;
+  String? socketId = await agent.socketId;
   if (socketId != null) {
     String holderSocketId = "Sihuz9kg2cWz4gcdAAXz";
     final minimalCompactJson = {
@@ -60,7 +53,7 @@ initiatedByHolderScenario() async {
 
     String encoded = didConnectRequestMessage.encode(CompressionLevel.json);
     print("Received encoded request message from holder: $encoded");
-    await client.sendDIDAuthInitMessage(encoded);
+    await agent.sendDIDAuthInitMessage(encoded);
   } else {
     print("Socket ID is null");
   }
@@ -70,22 +63,20 @@ initiatedByVerifierScenario() async {
   String mnemonic =
       "bamboo absorb chief dog box envelope leisure pink alone service spin more";
   String did = "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z";
-  InfraDIDCommSocketClient client = InfraDIDCommSocketClient(
+  InfraDIDCommAgent agent = InfraDIDCommAgent(
     url: "http://data-market.test.newnal.com:9000",
     did: did,
     mnemonic: mnemonic,
     role: "VERIFIER",
   );
 
-  client.setDIDAuthInitCallback(didAuthInitCallback);
-  client.setDIDAuthCallback(didAuthCallback);
-  client.setDIDConnectedCallback(didConnectedCallback);
-  client.setDIDAuthFailedCallback(didAuthFailedCallback);
+  agent.setDIDAuthCallback(didAuthCallback);
+  agent.setDIDConnectedCallback(didConnectedCallback);
+  agent.setDIDAuthFailedCallback(didAuthFailedCallback);
 
-  client.onMessage();
-  client.connect();
+  agent.init();
 
-  String? socketId = await client.socketId;
+  String? socketId = await agent.socketId;
   if (socketId != null) {
     String verifierSocketId = socketId;
     final minimalCompactJson = {

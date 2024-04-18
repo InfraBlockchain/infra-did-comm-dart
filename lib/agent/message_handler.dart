@@ -11,8 +11,7 @@ Future<void> messageHandler(
   String jwe,
   String mnemonic,
   String did,
-  InfraDIDCommSocketClient client,
-  bool Function(String peerDID)? didAuthInitCallback,
+  InfraDIDCommAgent agent,
   bool Function(String peerDID)? didAuthCallback,
   Function(String peerDID)? didConnectedCallback,
   Function(String peerDID)? didAuthFailedCallback,
@@ -37,21 +36,22 @@ Future<void> messageHandler(
       List<int> fromPublicKey = publicKeyFromAddress(fromAddress);
       Map<String, dynamic> jwsPayload =
           verifyJWS(jwsFromJwe, hex.encode(fromPublicKey));
-      client.peerInfo = {
+      agent.peerInfo = {
         "did": jwsPayload["from"],
         "socketId": jwsPayload["body"]["socketId"],
       };
-      client.isReceivedDIDAuthInit = true;
+      agent.isReceivedDIDAuthInit = true;
       // If Success, Send DID Auth Message
-      sendDIDAuthMessage(mnemonic, jwsPayload, client.socket);
+      if (didAuthCallback != null) didAuthCallback(fromDID);
+      sendDIDAuthMessage(mnemonic, jwsPayload, agent.socket);
     }
     if (alg == "dir") {
       // Handle DIDAuth && DIDConnected Message
       List<int> privatekey = await privateKeyFromUri(mnemonic);
       Map<String, dynamic> x25519JwkPrivateKey =
           await x25519JwkFromEd25519PrivateKey(privatekey);
-      if (client.peerInfo.containsKey("did")) {
-        String? fromDID = client.peerInfo["did"];
+      if (agent.peerInfo.containsKey("did")) {
+        String? fromDID = agent.peerInfo["did"];
         String fromAddress = fromDID!.split(":").last;
         List<int> fromPublicKey = publicKeyFromAddress(fromAddress);
         Map<String, dynamic> x25519JwkPublicKey =
@@ -66,35 +66,36 @@ Future<void> messageHandler(
             verifyJWS(jwsFromJwe, hex.encode(fromPublicKey));
         if (jwsPayload["type"] == "DIDAuth") {
           // If Success, Send DID Connected Message
+          if (didAuthCallback != null) didAuthCallback(fromDID);
           sendDIDConnectedMessageFromDIDAuthMessage(
             mnemonic,
             jwsPayload,
-            client.socket,
+            agent.socket,
           );
         }
         if (jwsPayload["type"] == "DIDConnected") {
           print("DIDConnected Message Received");
           if (didConnectedCallback != null) didConnectedCallback(fromDID);
-          client.isDIDConnected = true;
-          if (client.role == "VERIFIER") {
+          agent.isDIDConnected = true;
+          if (agent.role == "VERIFIER") {
             sendDIDConnectedMessageFromDIDConnectedMessage(
               mnemonic,
               jwsPayload,
-              client,
+              agent,
             );
           }
         }
         if (jwsPayload["type"] == "DIDAuthFailed") {
           if (didAuthFailedCallback != null) didAuthFailedCallback(fromDID);
           print("DIDAuthFailed Message Received");
-          client.disconnect();
+          agent.disconnect();
         }
       }
     }
   } catch (e) {
-    client.peerInfo.clear();
-    sendDIDAuthFailedMessage(mnemonic, did, client);
-    client.socket.disconnect();
+    agent.peerInfo.clear();
+    sendDIDAuthFailedMessage(mnemonic, did, agent);
+    agent.socket.disconnect();
   }
 }
 
@@ -102,7 +103,7 @@ Future<String> sendDIDAuthInitMessageToReceiver(
   DIDAuthInitMessage message,
   String mnemonic,
   String receiverDID,
-  InfraDIDCommSocketClient client,
+  InfraDIDCommAgent agent,
 ) async {
   Map<String, dynamic> jsonMessage = message.toJson();
   String stringMessage = json.encode(jsonMessage);
@@ -111,7 +112,7 @@ Future<String> sendDIDAuthInitMessageToReceiver(
 
   String receiverAddress = receiverDID.split(":").last;
   List<int> receiverPublicKey = publicKeyFromAddress(receiverAddress);
-  client.peerInfo = {"did": message.from, "socketId": message.peerSocketId};
+  agent.peerInfo = {"did": message.from, "socketId": message.peerSocketId};
   String jws = signJWS(stringMessage, hex.encode(extendedPrivatekey));
 
   final ephemeralKeyPair = await generateX25519EphemeralKeyPair();
@@ -228,7 +229,7 @@ Future<void> sendDIDConnectedMessageFromDIDAuthMessage(
 Future<void> sendDIDConnectedMessageFromDIDConnectedMessage(
   String mnemonic,
   Map<String, dynamic> didConnectedMessage,
-  InfraDIDCommSocketClient client,
+  InfraDIDCommAgent agent,
 ) async {
   int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
   var uuid = Uuid();
@@ -243,7 +244,7 @@ Future<void> sendDIDConnectedMessageFromDIDConnectedMessage(
     context: Context.fromJson(didConnectedMessage["body"]["context"]),
     status: "Successfully Connected",
   );
-  String peerSocketId = client.peerInfo["socketId"]!;
+  String peerSocketId = agent.peerInfo["socketId"]!;
   List<int> extendedPrivatekey = await extendedPrivateKeyFromUri(mnemonic);
   List<int> privatekey = await privateKeyFromUri(mnemonic);
   List<int> receiverpublicKey =
@@ -263,7 +264,7 @@ Future<void> sendDIDConnectedMessageFromDIDConnectedMessage(
     publicKeyfromX25519Jwk(x25519JwkReceiverPublicKey),
   );
   String jwe = encryptJWE(jws, jwkFromSharedKey(sharedKey));
-  client.socket.emit(
+  agent.socket.emit(
     "message",
     {"to": peerSocketId, "m": jwe},
   );
@@ -275,15 +276,15 @@ Future<void> sendDIDConnectedMessageFromDIDConnectedMessage(
 Future<void> sendDIDAuthFailedMessage(
   String mnemonic,
   String did,
-  InfraDIDCommSocketClient client, {
+  InfraDIDCommAgent agent, {
   Context? context,
 }) async {
   int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
   var uuid = Uuid();
   var id = uuid.v4();
-  if (client.peerInfo.containsKey("did")) {
-    String? receiverDID = client.peerInfo["did"];
-    String? receiverSocketId = client.peerInfo["socketId"];
+  if (agent.peerInfo.containsKey("did")) {
+    String? receiverDID = agent.peerInfo["did"];
+    String? receiverSocketId = agent.peerInfo["socketId"];
     DIDAuthFailedMessage didAuthFailedMessage = DIDAuthFailedMessage(
       id: id,
       from: did,
@@ -313,7 +314,7 @@ Future<void> sendDIDAuthFailedMessage(
       publicKeyfromX25519Jwk(x25519JwkReceiverPublicKey),
     );
     String jwe = encryptJWE(jws, jwkFromSharedKey(sharedKey));
-    client.socket.emit("message", {"to": receiverSocketId, "m": jwe});
+    agent.socket.emit("message", {"to": receiverSocketId, "m": jwe});
     print("DIDAuthFailed sent to $receiverSocketId");
   }
 }

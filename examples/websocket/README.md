@@ -35,7 +35,7 @@ main() async {
 
 ...
 
-  String? socketId = await client.socketId;
+  String? socketId = await agent.socketId;
   if (socketId != null) {
     String holderSocketId = "tDh94WFOolVYka_ZAALk"; // Set HolderSocketId
     final minimalCompactJson = {
@@ -85,7 +85,7 @@ main() async {
 
 ...
 
-  String? socketId = await client.socketId;
+  String? socketId = await agent.socketId;
   if (socketId != null) {
     String verifierSocketId = "G_A98d1uN5zwvLBzAALq"; // Set VerifierSocketId
     final minimalCompactJson = {

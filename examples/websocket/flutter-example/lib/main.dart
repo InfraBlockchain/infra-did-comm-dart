@@ -37,7 +37,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String mnemonic =
       "bamboo absorb chief dog box envelope leisure pink alone service spin more";
   String did = "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z";
-  late InfraDIDCommSocketClient client;
+  late InfraDIDCommAgent agent;
 
   late QRViewController controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
@@ -51,14 +51,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void setClientWithHolderRole() {
-    client = InfraDIDCommSocketClient(
+    agent = InfraDIDCommAgent(
       url: "http://data-market.test.newnal.com:9000",
       did: did,
       mnemonic: mnemonic,
       role: "HOLDER",
     );
-    client.onMessage();
-    client.didConnectedCallback = (String peerDID) {
+    agent.onMessage();
+    agent.didConnectedCallback = (String peerDID) {
       print("DID connected: $peerDID");
       setState(() {
         didConnected = true; // 연결되었음을 상태에 반영
@@ -67,14 +67,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void setClientWithVerifierRole() {
-    client = InfraDIDCommSocketClient(
+    agent = InfraDIDCommAgent(
       url: "http://data-market.test.newnal.com:9000",
       did: did,
       mnemonic: mnemonic,
       role: "VERIFIER",
     );
-    client.onMessage();
-    client.didConnectedCallback = (String peerDID) {
+    agent.onMessage();
+    agent.didConnectedCallback = (String peerDID) {
       print("DID connected: $peerDID");
       setState(() {
         didConnected = true; // 연결되었음을 상태에 반영
@@ -83,15 +83,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> connectWebsocket() async {
-    client.connect();
+    agent.connect();
   }
 
   void disconnectWebsocket() {
-    client.disconnect();
+    agent.disconnect();
   }
 
   Future<void> receiveEncodedConnectRequestMessage() async {
-    String? socketId = await client.socketId;
+    String? socketId = await agent.socketId;
     if (socketId != null) {
       String peerSocketId = "QH0Y0ej-hx27D4DSAALY";
       final minimalCompactJson = {
@@ -105,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
           DIDConnectRequestMessage.fromJson(minimalCompactJson);
 
       String encoded = didConnectRequestMessage.encode(CompressionLevel.json);
-      await client.sendDIDAuthInitMessage(encoded);
+      await agent.sendDIDAuthInitMessage(encoded);
     }
   }
 
@@ -173,7 +173,7 @@ class _MyHomePageState extends State<MyHomePage> {
           actions: [
             TextButton(
               onPressed: () {
-                client.disconnect();
+                agent.disconnect();
                 Navigator.of(context).pop(); // 모달 닫기
               },
               child: Text("OK"),
@@ -201,7 +201,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   padding: const EdgeInsets.all(16.0),
                   child: FloatingActionButton(
                     onPressed: () {
-                      client.disconnect();
+                      agent.disconnect();
                       Navigator.pop(context); // 뒤로가기 버튼
                     },
                     tooltip: '뒤로가기',
@@ -226,7 +226,7 @@ class _MyHomePageState extends State<MyHomePage> {
         lastScan = currentScan;
         String data = scanData.code!;
         print(data);
-        client.sendDIDAuthInitMessage(data);
+        agent.sendDIDAuthInitMessage(data);
       }
     });
   }
@@ -241,11 +241,11 @@ class QRCodeModal extends StatefulWidget {
 }
 
 class _QRCodeModalState extends State<QRCodeModal> {
-  late InfraDIDCommSocketClient client;
+  late InfraDIDCommAgent agent;
   String encode = "";
 
   void showQR() {
-    client = InfraDIDCommSocketClient(
+    agent = InfraDIDCommAgent(
       url: "http://data-market.test.newnal.com:9000",
       did: "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
       mnemonic:
@@ -257,7 +257,7 @@ class _QRCodeModalState extends State<QRCodeModal> {
       action: "connect",
     );
     didConnectRequestLoop(
-        client,
+        agent,
         context,
         15,
         (encodedMessage) => {
@@ -292,7 +292,7 @@ class _QRCodeModalState extends State<QRCodeModal> {
         ),
         ElevatedButton(
           onPressed: () {
-            client.disconnect();
+            agent.disconnect();
             Navigator.of(context).pop();
           },
           child: const Text("닫기"),

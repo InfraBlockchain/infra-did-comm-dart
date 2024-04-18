@@ -12,7 +12,7 @@ main() async {
   String mnemonic =
       "bamboo absorb chief dog box envelope leisure pink alone service spin more";
   String did = "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z";
-  InfraDIDCommSocketClient client = InfraDIDCommSocketClient(
+  InfraDIDCommAgent agent = InfraDIDCommAgent(
     url: "http://data-market.test.newnal.com:9000",
     did: did,
     mnemonic: mnemonic,
@@ -22,12 +22,12 @@ main() async {
     "domain": "infraDID",
     "action": "connect",
   };
-  client.onMessage();
+  agent.onMessage();
   final context = Context.fromJson(contextJson);
   int loopTimeSeconds = 30;
 
   didConnectRequestLoop(
-    client,
+    agent,
     context,
     loopTimeSeconds,
     callback,

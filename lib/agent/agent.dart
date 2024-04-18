@@ -1,12 +1,12 @@
 import "dart:async";
 
-import "package:infra_did_comm_dart/websocket/message_handler.dart";
+import "package:infra_did_comm_dart/agent/message_handler.dart";
 import "package:socket_io_client/socket_io_client.dart" as IO;
 import "package:uuid/uuid.dart";
 
 import "../infra_did_comm_dart.dart";
 
-class InfraDIDCommSocketClient {
+class InfraDIDCommAgent {
   String did;
   String mnemonic;
   String role = "HOLDER";
@@ -18,8 +18,6 @@ class InfraDIDCommSocketClient {
   bool isDIDConnected = false;
   bool isReceivedDIDAuthInit = false;
 
-  late bool Function(String peerDID) didAuthInitCallback =
-      (String peerDID) => true;
   late bool Function(String peerDID) didAuthCallback = (String peerDID) => true;
   late Function(String peerDID) didConnectedCallback = (String peerDID) {};
   late Function(String peerDID) didAuthFailedCallback = (String peerDID) {};
@@ -27,7 +25,7 @@ class InfraDIDCommSocketClient {
   Completer<String?> _socketIdCompleter = Completer();
   Future<String?> get socketId => _socketIdCompleter.future;
 
-  InfraDIDCommSocketClient({
+  InfraDIDCommAgent({
     required this.url,
     required this.did,
     required this.mnemonic,
@@ -63,10 +61,6 @@ class InfraDIDCommSocketClient {
     );
   }
 
-  void setDIDAuthInitCallback(bool Function(String peerDID) callback) {
-    didAuthInitCallback = callback;
-  }
-
   void setDIDAuthCallback(bool Function(String peerDID) callback) {
     didAuthCallback = callback;
   }
@@ -79,16 +73,44 @@ class InfraDIDCommSocketClient {
     didAuthFailedCallback = callback;
   }
 
-  connect() {
+  init() {
+    onMessage();
+    connect();
+  }
+
+  initWithDynamicQR(String encoded) {
+    onMessage();
+    connect();
+    sendDIDAuthInitMessage(encoded);
+  }
+
+  initWithStaticQR(String encoded) {
+    onMessage();
+    connect();
+    // TODO: Implement this method
+  }
+
+  initWithDIDRequestMessageLoop(
+    Context context,
+    int loopTimeSeconds,
+    Function(String encodedMessage) loopCallback,
+  ) {
+    onMessage();
+    didConnectRequestLoop(this, context, loopTimeSeconds, loopCallback);
+  }
+
+  reset() {
+    peerInfo = {};
     isReceivedDIDAuthInit = false;
     isDIDConnected = false;
+  }
+
+  connect() {
     socket.connect();
   }
 
   disconnect() {
-    peerInfo = {};
-    isDIDConnected = false;
-    isReceivedDIDAuthInit = false;
+    reset();
     socket.disconnect();
   }
 
@@ -101,7 +123,6 @@ class InfraDIDCommSocketClient {
           mnemonic,
           did,
           this,
-          didAuthInitCallback,
           didAuthCallback,
           didConnectedCallback,
           didAuthFailedCallback,
