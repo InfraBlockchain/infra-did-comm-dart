@@ -1,5 +1,6 @@
 import "package:infra_did_comm_dart/messages/commons/context.dart";
 
+/// Represents a DID Connected message.
 class DIDConnectedMessage {
   String id;
   String type = "DIDConnected";
@@ -10,6 +11,7 @@ class DIDConnectedMessage {
   Context context;
   String status;
 
+  /// Constructs a [DIDConnectedMessage] instance.
   DIDConnectedMessage({
     required this.id,
     required this.from,
@@ -28,6 +30,7 @@ class DIDConnectedMessage {
     status = status;
   }
 
+  /// Constructs a [DIDConnectedMessage] instance from a JSON map.
   factory DIDConnectedMessage.fromJson(Map<String, dynamic> json) {
     try {
       if (json.containsKey("type") && json["type"] != "DIDConnected") {
@@ -51,6 +54,7 @@ class DIDConnectedMessage {
     }
   }
 
+  /// Converts the [DIDConnectedMessage] instance to a JSON map.
   Map<String, dynamic> toJson() {
     try {
       final Map<String, dynamic> data = {};

@@ -7,6 +7,22 @@ import "package:infra_did_comm_dart/infra_did_comm_dart.dart";
 import "package:socket_io_client/socket_io_client.dart" as IO;
 import "package:uuid/uuid.dart";
 
+/// Handles incoming messages and performs necessary actions based on the message type.
+///
+/// The [messageHandler] function takes in the following parameters:
+/// - [jwe]: The JWE (JSON Web Encryption) string representing the incoming message.
+/// - [mnemonic]: The mnemonic string used for key generation.
+/// - [did]: The DID (Decentralized Identifier) string.
+/// - [agent]: An instance of the [InfraDIDCommAgent] class representing the agent.
+/// - [didAuthCallback]: An optional callback function that is called when a DID Auth message is received.
+/// - [didConnectedCallback]: An optional callback function that is called when a DID Connected message is received.
+/// - [didAuthFailedCallback]: An optional callback function that is called when a DID Auth Failed message is received.
+///
+/// The [messageHandler] function handles different types of messages based on the algorithm specified in the JWE header.
+/// If the algorithm is "ECDH-ES", it handles the DIDAuthInit message and sends a DID Auth message if successful.
+/// If the algorithm is "dir", it handles both DIDAuth and DIDConnected messages.
+///
+/// Throws an exception if an error occurs during message handling.
 Future<void> messageHandler(
   String jwe,
   String mnemonic,

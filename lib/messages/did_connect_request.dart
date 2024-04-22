@@ -3,6 +3,7 @@ import "package:infra_did_comm_dart/messages/commons/initiator.dart";
 import "package:infra_did_comm_dart/types/types.dart";
 import "package:infra_did_comm_dart/utils/encode.dart";
 
+/// Represents a DID Connect Request message.
 class DIDConnectRequestMessage {
   String type = "DIDConnectReq";
   String from;
@@ -11,6 +12,13 @@ class DIDConnectRequestMessage {
   Context context;
   Initiator initiator;
 
+  /// Constructs a [DIDConnectRequestMessage] instance.
+  ///
+  /// The [from] parameter specifies the sender of the message.
+  /// The [createdTime] parameter specifies the time when the message was created.
+  /// The [expiresTime] parameter specifies the time when the message expires.
+  /// The [context] parameter specifies the context of the message.
+  /// The [initiator] parameter specifies the initiator of the message.
   DIDConnectRequestMessage({
     required this.from,
     this.createdTime,
@@ -25,6 +33,9 @@ class DIDConnectRequestMessage {
     initiator = initiator;
   }
 
+  /// Constructs a [DIDConnectRequestMessage] instance from a JSON map.
+  ///
+  /// The [json] parameter specifies the JSON map to construct the message from.
   factory DIDConnectRequestMessage.fromJson(Map<String, dynamic> json) {
     try {
       if (json.containsKey("type") && json["type"] != "DIDConnectReq") {
@@ -48,6 +59,9 @@ class DIDConnectRequestMessage {
     }
   }
 
+  /// Encodes the message to a string representation.
+  ///
+  /// The [compressLevel] parameter specifies the compression level to use.
   String encode(CompressionLevel compressLevel) {
     try {
       Map<String, dynamic> data = {};
@@ -67,6 +81,9 @@ class DIDConnectRequestMessage {
     }
   }
 
+  /// Decodes the message from an encoded string.
+  ///
+  /// The [encoded] parameter specifies the encoded string to decode.
   static DIDConnectRequestMessage decode(String encoded) {
     try {
       Map<String, dynamic> data = inflateAndDecode(encoded);
@@ -76,6 +93,7 @@ class DIDConnectRequestMessage {
     }
   }
 
+  /// Converts the message to a JSON map.
   Map<String, dynamic> toJson() {
     try {
       final Map<String, dynamic> data = {};
@@ -93,6 +111,7 @@ class DIDConnectRequestMessage {
     }
   }
 
+  /// Converts the message to a compact JSON map.
   Map<String, dynamic> toCompactJson() {
     try {
       final Map<String, dynamic> data = {};
@@ -110,6 +129,7 @@ class DIDConnectRequestMessage {
     }
   }
 
+  /// Converts the message to a minimal compact JSON map.
   Map<String, dynamic> toMinimalCompactJson() {
     try {
       final Map<String, dynamic> data = {};

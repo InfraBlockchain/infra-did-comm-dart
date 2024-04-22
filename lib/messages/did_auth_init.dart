@@ -1,5 +1,6 @@
 import "package:infra_did_comm_dart/messages/commons/context.dart";
 
+/// Represents a DID Auth Init message.
 class DIDAuthInitMessage {
   String id;
   String type = "DIDAuthInit";
@@ -11,6 +12,10 @@ class DIDAuthInitMessage {
   String socketId;
   String peerSocketId;
 
+  /// Constructs a new [DIDAuthInitMessage] instance.
+  ///
+  /// The [id], [from], [to], [context], [socketId], and [peerSocketId] parameters are required.
+  /// The [createdTime] and [expiresTime] parameters are optional.
   DIDAuthInitMessage({
     required this.id,
     required this.from,
@@ -31,6 +36,10 @@ class DIDAuthInitMessage {
     peerSocketId = peerSocketId;
   }
 
+  /// Converts the [DIDAuthInitMessage] instance to a JSON object.
+  ///
+  /// Returns a map representing the JSON object.
+  /// Throws an exception if an error occurs during the conversion.
   Map<String, dynamic> toJson() {
     try {
       final Map<String, dynamic> data = {};
