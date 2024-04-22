@@ -15,6 +15,6 @@ export "utils/encode.dart";
 export "utils/key.dart";
 export "utils/key_convert.dart";
 
-export "websocket/socket_io_client.dart";
-export "websocket/dynamic_qr.dart";
+export "agent/agent.dart";
+export "agent/dynamic_qr.dart";
 export "types/types.dart";

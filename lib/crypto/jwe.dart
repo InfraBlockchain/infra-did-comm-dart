@@ -2,6 +2,8 @@ import "package:infra_did_comm_dart/crypto/jose_plus/jwe.dart";
 import "package:infra_did_comm_dart/crypto/jose_plus/jwk.dart";
 import "package:jwk/jwk.dart";
 
+/// Encrypts the provided [data] using the specified [key] and optional [epk].
+/// Returns the compact serialization of the encrypted JWE.
 String encryptJWE(
   String data,
   Map<String, dynamic> key, {
@@ -26,6 +28,8 @@ String encryptJWE(
   return jwe.toCompactSerialization();
 }
 
+/// Decrypts the provided [jweCompact] using the specified [key].
+/// Returns the decrypted payload as a string.
 Future<String> decryptJWE(String jweCompact, Map<String, dynamic> key) async {
   var keyJwk = JsonWebKey.fromJson(key);
 
@@ -38,6 +42,7 @@ Future<String> decryptJWE(String jweCompact, Map<String, dynamic> key) async {
   return payload.stringContent;
 }
 
+/// Extracts and returns the header of the provided [jweCompact] as a map.
 Map<String, dynamic> extractJWEHeader(String jweCompact) {
   var jwe = JsonWebEncryption.fromCompactSerialization(jweCompact);
   return jwe.commonProtectedHeader.toJson();

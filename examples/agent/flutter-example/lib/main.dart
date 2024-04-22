@@ -37,7 +37,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String mnemonic =
       "bamboo absorb chief dog box envelope leisure pink alone service spin more";
   String did = "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z";
-  late InfraDIDCommSocketClient client;
+  late InfraDIDCommAgent agent;
 
   late QRViewController controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
@@ -51,14 +51,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void setClientWithHolderRole() {
-    client = InfraDIDCommSocketClient(
+    agent = InfraDIDCommAgent(
       url: "http://data-market.test.newnal.com:9000",
       did: did,
       mnemonic: mnemonic,
       role: "HOLDER",
     );
-    client.onMessage();
-    client.didConnectedCallback = (String peerDID) {
+    agent.onMessage();
+    agent.didConnectedCallback = (String peerDID) {
       print("DID connected: $peerDID");
       setState(() {
         didConnected = true; // 연결되었음을 상태에 반영
@@ -67,14 +67,14 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void setClientWithVerifierRole() {
-    client = InfraDIDCommSocketClient(
+    agent = InfraDIDCommAgent(
       url: "http://data-market.test.newnal.com:9000",
       did: did,
       mnemonic: mnemonic,
       role: "VERIFIER",
     );
-    client.onMessage();
-    client.didConnectedCallback = (String peerDID) {
+    agent.onMessage();
+    agent.didConnectedCallback = (String peerDID) {
       print("DID connected: $peerDID");
       setState(() {
         didConnected = true; // 연결되었음을 상태에 반영
@@ -83,30 +83,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> connectWebsocket() async {
-    client.connect();
+    agent.connect();
   }
 
   void disconnectWebsocket() {
-    client.disconnect();
-  }
-
-  Future<void> receiveEncodedConnectRequestMessage() async {
-    String? socketId = await client.socketId;
-    if (socketId != null) {
-      String peerSocketId = "QH0Y0ej-hx27D4DSAALY";
-      final minimalCompactJson = {
-        "from": "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
-        "body": {
-          "i": {"sid": peerSocketId},
-          "c": {"d": "pet-i.net", "a": "connect"},
-        },
-      };
-      final didConnectRequestMessage =
-          DIDConnectRequestMessage.fromJson(minimalCompactJson);
-
-      String encoded = didConnectRequestMessage.encode(CompressionLevel.json);
-      await client.sendDIDAuthInitMessage(encoded);
-    }
+    agent.disconnect();
   }
 
   @override
@@ -137,14 +118,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: disconnectWebsocket,
                 child: const Text("wsDisconnect")),
             ElevatedButton(
-                onPressed: receiveEncodedConnectRequestMessage,
-                child: const Text("Receive encoded Connect Request Message")),
-            ElevatedButton(
               onPressed: () {
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
-                    return const QRCodeModal(); // 모달 창 표시
+                    return QRCodeModal(agent: agent); // 모달 창 표시
                   },
                 );
               },
@@ -173,8 +151,7 @@ class _MyHomePageState extends State<MyHomePage> {
           actions: [
             TextButton(
               onPressed: () {
-                client.disconnect();
-                Navigator.of(context).pop(); // 모달 닫기
+                Navigator.of(context).popUntil((route) => route.isFirst);
               },
               child: Text("OK"),
             ),
@@ -201,7 +178,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   padding: const EdgeInsets.all(16.0),
                   child: FloatingActionButton(
                     onPressed: () {
-                      client.disconnect();
+                      agent.disconnect();
                       Navigator.pop(context); // 뒤로가기 버튼
                     },
                     tooltip: '뒤로가기',
@@ -219,21 +196,23 @@ class _MyHomePageState extends State<MyHomePage> {
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
 
-    controller.scannedDataStream.listen((scanData) {
+    controller.scannedDataStream.listen((scanData) async {
       final currentScan = DateTime.now();
       if (lastScan == null ||
-          currentScan.difference(lastScan!) > const Duration(seconds: 1)) {
+          currentScan.difference(lastScan!) > const Duration(seconds: 3)) {
         lastScan = currentScan;
         String data = scanData.code!;
-        print(data);
-        client.sendDIDAuthInitMessage(data);
+        print("Scanned data: $data");
+        await agent.initWithConnectRequest(data);
       }
     });
   }
 }
 
 class QRCodeModal extends StatefulWidget {
-  const QRCodeModal({super.key});
+  final InfraDIDCommAgent agent;
+
+  const QRCodeModal({Key? key, required this.agent}) : super(key: key);
 
   @override
   // ignore: library_private_types_in_public_api
@@ -241,23 +220,15 @@ class QRCodeModal extends StatefulWidget {
 }
 
 class _QRCodeModalState extends State<QRCodeModal> {
-  late InfraDIDCommSocketClient client;
   String encode = "";
 
   void showQR() {
-    client = InfraDIDCommSocketClient(
-      url: "http://data-market.test.newnal.com:9000",
-      did: "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
-      mnemonic:
-          "bamboo absorb chief dog box envelope leisure pink alone service spin more",
-      role: "HOLDER",
-    );
     Context context = Context(
       domain: "infra-did-comm",
       action: "connect",
     );
     didConnectRequestLoop(
-        client,
+        widget.agent,
         context,
         15,
         (encodedMessage) => {
@@ -292,7 +263,7 @@ class _QRCodeModalState extends State<QRCodeModal> {
         ),
         ElevatedButton(
           onPressed: () {
-            client.disconnect();
+            widget.agent.disconnect();
             Navigator.of(context).pop();
           },
           child: const Text("닫기"),

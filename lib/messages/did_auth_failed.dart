@@ -1,5 +1,6 @@
 import "package:infra_did_comm_dart/messages/commons/context.dart";
 
+/// Represents a DID Auth Failed message.
 class DIDAuthFailedMessage {
   String id;
   String type = "DIDAuthFailed";
@@ -10,6 +11,7 @@ class DIDAuthFailedMessage {
   Context context;
   String reason;
 
+  /// Constructs a [DIDAuthFailedMessage] instance.
   DIDAuthFailedMessage({
     required this.id,
     required this.from,
@@ -28,6 +30,7 @@ class DIDAuthFailedMessage {
     reason = reason;
   }
 
+  /// Constructs a [DIDAuthFailedMessage] instance from a JSON object.
   factory DIDAuthFailedMessage.fromJson(Map<String, dynamic> json) {
     try {
       if (json.containsKey("type") && json["type"] != "DIDAuthFailed") {
@@ -51,6 +54,7 @@ class DIDAuthFailedMessage {
     }
   }
 
+  /// Converts the [DIDAuthFailedMessage] instance to a JSON object.
   Map<String, dynamic> toJson() {
     try {
       final Map<String, dynamic> data = {};

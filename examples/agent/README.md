@@ -1,4 +1,4 @@
-# Socket.io Example
+# Agent Example
 
 This is an example that demonstrates how to connect to a socket.io server using this library.
 
@@ -6,7 +6,7 @@ This is an example that demonstrates how to connect to a socket.io server using 
 
 ### Scenario 1: Holder Initiated Connection
 
-1. Run the `socket_io_holder.dart` file with `initiatedByHolderScenario` function in main
+1. Run the `agent_holder.dart` file with `initiatedByHolderScenario` function in main
 
 ```dart
 main() async {
@@ -19,10 +19,10 @@ main() async {
 ```
 
 ```bash
-dart run socket_io_holder.dart
+dart run agent_holder.dart
 ```
 
-2. Run the `socket_io_verifier.dart` file with `initiatedByHolderScenario` function in main 
+2. Run the `agent_verifier.dart` file with `initiatedByHolderScenario` function in main 
 
 ```dart
 main() async {
@@ -35,7 +35,7 @@ main() async {
 
 ...
 
-  String? socketId = await client.socketId;
+  String? socketId = await agent.socketId;
   if (socketId != null) {
     String holderSocketId = "tDh94WFOolVYka_ZAALk"; // Set HolderSocketId
     final minimalCompactJson = {
@@ -49,14 +49,14 @@ main() async {
 ```
 
 ```bash
-dart run socket_io_verifier.dart
+dart run agent_verifier.dart
 ```
 
 
 ### Scenario 2: Verifier Initiated Connection
 
 
-1. Run the `socket_io_verifier.dart` file with `initiatedByVerifierScenario` function in main
+1. Run the `agent_verifier.dart` file with `initiatedByVerifierScenario` function in main
 
 ```dart
 main() async {
@@ -69,10 +69,10 @@ main() async {
 ```
 
 ```bash
-dart run socket_io_verifier.dart
+dart run agent_verifier.dart
 ```
 
-2. Run the `socket_io_holder.dart` file with `initiatedByVerifierScenario` function in main
+2. Run the `agent_holder.dart` file with `initiatedByVerifierScenario` function in main
 
 ```dart
 main() async {
@@ -85,7 +85,7 @@ main() async {
 
 ...
 
-  String? socketId = await client.socketId;
+  String? socketId = await agent.socketId;
   if (socketId != null) {
     String verifierSocketId = "G_A98d1uN5zwvLBzAALq"; // Set VerifierSocketId
     final minimalCompactJson = {
@@ -100,5 +100,5 @@ main() async {
 ```
 
 ```bash
-dart run socket_io_holder.dart
+dart run agent_holder.dart
 ```

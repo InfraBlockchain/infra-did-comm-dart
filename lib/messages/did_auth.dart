@@ -1,5 +1,6 @@
 import "package:infra_did_comm_dart/messages/commons/context.dart";
 
+/// Represents a DIDAuth message.
 class DIDAuthMessage {
   String id;
   String type = "DIDAuth";
@@ -11,6 +12,7 @@ class DIDAuthMessage {
   String? socketId;
   String peerSocketId;
 
+  /// Constructs a [DIDAuthMessage] instance.
   DIDAuthMessage({
     required this.id,
     required this.from,
@@ -31,6 +33,7 @@ class DIDAuthMessage {
     peerSocketId = peerSocketId;
   }
 
+  /// Constructs a [DIDAuthMessage] instance from a JSON map.
   factory DIDAuthMessage.fromJson(Map<String, dynamic> json) {
     try {
       if (json.containsKey("type") && json["type"] != "DIDAuth") {
@@ -57,6 +60,7 @@ class DIDAuthMessage {
     }
   }
 
+  /// Converts the [DIDAuthMessage] instance to a JSON map.
   Map<String, dynamic> toJson() {
     try {
       final Map<String, dynamic> data = {};

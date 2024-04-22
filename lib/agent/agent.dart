@@ -1,12 +1,13 @@
 import "dart:async";
 
-import "package:infra_did_comm_dart/websocket/message_handler.dart";
+import "package:infra_did_comm_dart/agent/message_handler.dart";
 import "package:socket_io_client/socket_io_client.dart" as IO;
 import "package:uuid/uuid.dart";
 
 import "../infra_did_comm_dart.dart";
 
-class InfraDIDCommSocketClient {
+/// Represents an InfraDIDComm agent that can connect to other agents and exchange messages.
+class InfraDIDCommAgent {
   String did;
   String mnemonic;
   String role = "HOLDER";
@@ -18,8 +19,6 @@ class InfraDIDCommSocketClient {
   bool isDIDConnected = false;
   bool isReceivedDIDAuthInit = false;
 
-  late bool Function(String peerDID) didAuthInitCallback =
-      (String peerDID) => true;
   late bool Function(String peerDID) didAuthCallback = (String peerDID) => true;
   late Function(String peerDID) didConnectedCallback = (String peerDID) {};
   late Function(String peerDID) didAuthFailedCallback = (String peerDID) {};
@@ -27,7 +26,13 @@ class InfraDIDCommSocketClient {
   Completer<String?> _socketIdCompleter = Completer();
   Future<String?> get socketId => _socketIdCompleter.future;
 
-  InfraDIDCommSocketClient({
+  /// Creates a new instance of [InfraDIDCommAgent].
+  ///
+  /// [url] - The URL of the server to connect to.
+  /// [did] - The DID (Decentralized Identifier) of the agent.
+  /// [mnemonic] - The mnemonic used for cryptographic operations.
+  /// [role] - The role of the agent. Must be "HOLDER" or "VERIFIER".
+  InfraDIDCommAgent({
     required this.url,
     required this.did,
     required this.mnemonic,
@@ -63,35 +68,84 @@ class InfraDIDCommSocketClient {
     );
   }
 
-  void setDIDAuthInitCallback(bool Function(String peerDID) callback) {
-    didAuthInitCallback = callback;
-  }
-
+  /// Sets the callback function to be called when a DID authentication request is received.
+  ///
+  /// [callback] - The callback function that takes a peer DID as a parameter and returns a boolean indicating whether the authentication is accepted or not.
   void setDIDAuthCallback(bool Function(String peerDID) callback) {
     didAuthCallback = callback;
   }
 
+  /// Sets the callback function to be called when a DID connection is established with a peer agent.
+  ///
+  /// [callback] - The callback function that takes a peer DID as a parameter.
   void setDIDConnectedCallback(Function(String peerDID) callback) {
     didConnectedCallback = callback;
   }
 
+  /// Sets the callback function to be called when a DID authentication fails with a peer agent.
+  ///
+  /// [callback] - The callback function that takes a peer DID as a parameter.
   void setDIDAuthFailedCallback(Function(String peerDID) callback) {
     didAuthFailedCallback = callback;
   }
 
-  connect() {
+  /// Initializes the agent by setting up message handling and connecting to the server.
+  init() async {
+    onMessage();
+    await connect();
+  }
+
+  /// Initializes the agent with a connect request message and connects to the server.
+  ///
+  /// [encoded] - The encoded connect request message.
+  initWithConnectRequest(String encoded) async {
+    onMessage();
+    await connect();
+    sendDIDAuthInitMessage(encoded);
+  }
+
+  /// Initializes the agent with a static connect request message and connects to the server.
+  ///
+  /// [encoded] - The encoded static connect request message.
+  initWithStaticConnectRequest(String encoded) async {
+    onMessage();
+    await connect();
+    // TODO: Implement this method
+  }
+
+  /// Initializes the agent with a DID request message loop and connects to the server.
+  ///
+  /// [context] - The context object.
+  /// [loopTimeSeconds] - The time interval in seconds between each loop iteration.
+  /// [loopCallback] - The callback function that takes an encoded message as a parameter and is called in each loop iteration.
+  initWithDIDRequestMessageLoop(
+    Context context,
+    int loopTimeSeconds,
+    Function(String encodedMessage) loopCallback,
+  ) {
+    onMessage();
+    didConnectRequestLoop(this, context, loopTimeSeconds, loopCallback);
+  }
+
+  /// Resets the agent by clearing peer information and flags.
+  reset() {
+    peerInfo = {};
     isReceivedDIDAuthInit = false;
     isDIDConnected = false;
+  }
+
+  /// Connects the agent to the server.
+  connect() {
     socket.connect();
   }
 
+  /// Disconnects the agent from the server.
   disconnect() {
-    peerInfo = {};
-    isDIDConnected = false;
-    isReceivedDIDAuthInit = true;
+    reset();
     socket.disconnect();
   }
 
+  /// Sets up the message handling for the agent.
   void onMessage() {
     socket.on(
       "message",
@@ -101,7 +155,6 @@ class InfraDIDCommSocketClient {
           mnemonic,
           did,
           this,
-          didAuthInitCallback,
           didAuthCallback,
           didConnectedCallback,
           didAuthFailedCallback,
@@ -110,6 +163,9 @@ class InfraDIDCommSocketClient {
     );
   }
 
+  /// Sends a DID authentication initialization message to a receiver agent.
+  ///
+  /// [encoded] - The encoded DID authentication initialization message.
   Future<void> sendDIDAuthInitMessage(String encoded) async {
     final didConnectRequestMessage = DIDConnectRequestMessage.decode(encoded);
 

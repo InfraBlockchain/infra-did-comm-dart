@@ -1,12 +1,12 @@
 import "dart:typed_data";
-
 import "package:convert/convert.dart";
 import "package:cryptography/cryptography.dart";
 import "package:infra_did_comm_dart/utils/key_convert.dart";
 import "dart:convert";
-
 import "package:pinenacl/tweetnacl.dart";
 
+/// Generates a X25519 ephemeral key pair.
+/// Returns a Future that completes with a tuple containing the private key and the public key.
 Future<(List<int>, List<int>)> generateX25519EphemeralKeyPair() async {
   final algorithm = X25519();
   final keyPair = await algorithm.newKeyPair();
@@ -15,7 +15,8 @@ Future<(List<int>, List<int>)> generateX25519EphemeralKeyPair() async {
   return (privateKey, publicKey.bytes);
 }
 
-// Make 32-byte shared key from private key and public key
+/// Makes a 32-byte shared key from the private key and the public key.
+/// Returns a Future that completes with the shared key.
 Future<List<int>> makeSharedKey(
   List<int> privateKey,
   List<int> publicKey,
@@ -28,6 +29,8 @@ Future<List<int>> makeSharedKey(
   return sharedSecretKey.extractBytes();
 }
 
+/// Converts a X25519 private key to a JWK (JSON Web Key) representation.
+/// Returns a Future that completes with the JWK.
 Future<Map<String, dynamic>> x25519JwkFromX25519PrivateKey(
   List<int> privateKey,
 ) async {
@@ -43,6 +46,8 @@ Future<Map<String, dynamic>> x25519JwkFromX25519PrivateKey(
   return jwk;
 }
 
+/// Converts a X25519 public key to a JWK (JSON Web Key) representation.
+/// Returns the JWK.
 Map<String, dynamic> x25519JwkFromX25519PublicKey(List<int> publicKey) {
   final jwk = {
     "kty": "OKP",
@@ -52,6 +57,8 @@ Map<String, dynamic> x25519JwkFromX25519PublicKey(List<int> publicKey) {
   return jwk;
 }
 
+/// Converts an Ed25519 public key to a X25519 public key and then to a JWK (JSON Web Key) representation.
+/// Returns the JWK.
 Map<String, dynamic> x25519JwkFromEd25519PublicKey(
   List<int> publicKey,
 ) {
@@ -66,6 +73,8 @@ Map<String, dynamic> x25519JwkFromEd25519PublicKey(
   return jwk;
 }
 
+/// Converts an Ed25519 private key to a X25519 private key and then to a JWK (JSON Web Key) representation.
+/// Returns a Future that completes with the JWK.
 Future<Map<String, dynamic>> x25519JwkFromEd25519PrivateKey(
   List<int> privateKey,
 ) async {
@@ -86,6 +95,8 @@ Future<Map<String, dynamic>> x25519JwkFromEd25519PrivateKey(
   return jwk;
 }
 
+/// Converts a shared key to a JWK (JSON Web Key) representation.
+/// Returns the JWK.
 Map<String, dynamic> jwkFromSharedKey(List<int> sharedKey) {
   final jwk = {
     "kty": "oct",
@@ -95,12 +106,16 @@ Map<String, dynamic> jwkFromSharedKey(List<int> sharedKey) {
   return jwk;
 }
 
+/// Converts a X25519 JWK (JSON Web Key) to a X25519 public key.
+/// Returns the X25519 public key.
 List<int> publicKeyfromX25519Jwk(Map<String, dynamic> jwk) {
   Base64Codec base64 = const Base64Codec();
   final nomalizeBase64 = base64.normalize(jwk["x"]);
   return base64Url.decode(nomalizeBase64);
 }
 
+/// Converts a X25519 JWK (JSON Web Key) to a X25519 private key.
+/// Returns the X25519 private key.
 List<int> privateKeyfromX25519Jwk(Map<String, dynamic> jwk) {
   Base64Codec base64 = const Base64Codec();
   final nomalizeBase64 = base64.normalize(jwk["d"]);
