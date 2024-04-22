@@ -90,26 +90,26 @@ class InfraDIDCommAgent {
   }
 
   /// Initializes the agent by setting up message handling and connecting to the server.
-  init() {
+  init() async {
     onMessage();
-    connect();
+    await connect();
   }
 
   /// Initializes the agent with a connect request message and connects to the server.
   ///
   /// [encoded] - The encoded connect request message.
-  initWithConnectRequest(String encoded) {
+  initWithConnectRequest(String encoded) async {
     onMessage();
-    connect();
+    await connect();
     sendDIDAuthInitMessage(encoded);
   }
 
   /// Initializes the agent with a static connect request message and connects to the server.
   ///
   /// [encoded] - The encoded static connect request message.
-  initWithStaticConnectRequest(String encoded) {
+  initWithStaticConnectRequest(String encoded) async {
     onMessage();
-    connect();
+    await connect();
     // TODO: Implement this method
   }
 

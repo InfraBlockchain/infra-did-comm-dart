@@ -90,25 +90,6 @@ class _MyHomePageState extends State<MyHomePage> {
     agent.disconnect();
   }
 
-  Future<void> receiveEncodedConnectRequestMessage() async {
-    String? socketId = await agent.socketId;
-    if (socketId != null) {
-      String peerSocketId = "QH0Y0ej-hx27D4DSAALY";
-      final minimalCompactJson = {
-        "from": "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
-        "body": {
-          "i": {"sid": peerSocketId},
-          "c": {"d": "pet-i.net", "a": "connect"},
-        },
-      };
-      final didConnectRequestMessage =
-          DIDConnectRequestMessage.fromJson(minimalCompactJson);
-
-      String encoded = didConnectRequestMessage.encode(CompressionLevel.json);
-      await agent.sendDIDAuthInitMessage(encoded);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     if (didConnected) {
@@ -137,14 +118,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: disconnectWebsocket,
                 child: const Text("wsDisconnect")),
             ElevatedButton(
-                onPressed: receiveEncodedConnectRequestMessage,
-                child: const Text("Receive encoded Connect Request Message")),
-            ElevatedButton(
               onPressed: () {
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
-                    return const QRCodeModal(); // 모달 창 표시
+                    return QRCodeModal(agent: agent); // 모달 창 표시
                   },
                 );
               },
@@ -173,8 +151,7 @@ class _MyHomePageState extends State<MyHomePage> {
           actions: [
             TextButton(
               onPressed: () {
-                agent.disconnect();
-                Navigator.of(context).pop(); // 모달 닫기
+                Navigator.of(context).popUntil((route) => route.isFirst);
               },
               child: Text("OK"),
             ),
@@ -219,21 +196,23 @@ class _MyHomePageState extends State<MyHomePage> {
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
 
-    controller.scannedDataStream.listen((scanData) {
+    controller.scannedDataStream.listen((scanData) async {
       final currentScan = DateTime.now();
       if (lastScan == null ||
-          currentScan.difference(lastScan!) > const Duration(seconds: 1)) {
+          currentScan.difference(lastScan!) > const Duration(seconds: 3)) {
         lastScan = currentScan;
         String data = scanData.code!;
-        print(data);
-        agent.sendDIDAuthInitMessage(data);
+        print("Scanned data: $data");
+        await agent.initWithConnectRequest(data);
       }
     });
   }
 }
 
 class QRCodeModal extends StatefulWidget {
-  const QRCodeModal({super.key});
+  final InfraDIDCommAgent agent;
+
+  const QRCodeModal({Key? key, required this.agent}) : super(key: key);
 
   @override
   // ignore: library_private_types_in_public_api
@@ -241,23 +220,15 @@ class QRCodeModal extends StatefulWidget {
 }
 
 class _QRCodeModalState extends State<QRCodeModal> {
-  late InfraDIDCommAgent agent;
   String encode = "";
 
   void showQR() {
-    agent = InfraDIDCommAgent(
-      url: "http://data-market.test.newnal.com:9000",
-      did: "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
-      mnemonic:
-          "bamboo absorb chief dog box envelope leisure pink alone service spin more",
-      role: "HOLDER",
-    );
     Context context = Context(
       domain: "infra-did-comm",
       action: "connect",
     );
     didConnectRequestLoop(
-        agent,
+        widget.agent,
         context,
         15,
         (encodedMessage) => {
@@ -292,7 +263,7 @@ class _QRCodeModalState extends State<QRCodeModal> {
         ),
         ElevatedButton(
           onPressed: () {
-            agent.disconnect();
+            widget.agent.disconnect();
             Navigator.of(context).pop();
           },
           child: const Text("닫기"),

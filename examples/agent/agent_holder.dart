@@ -77,7 +77,7 @@ initiatedByVerifierScenario() async {
 
   String? socketId = await agent.socketId;
   if (socketId != null) {
-    String verifierSocketId = "Wp6O6Tve6zEN35esAAXT";
+    String verifierSocketId = "YUF-tN8SDHXa0k5EAAqp";
     final minimalCompactJson = {
       "from": "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
       "body": {
