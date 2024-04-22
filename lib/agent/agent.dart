@@ -78,13 +78,13 @@ class InfraDIDCommAgent {
     connect();
   }
 
-  initWithDynamicQR(String encoded) {
+  initWithConnectRequest(String encoded) {
     onMessage();
     connect();
     sendDIDAuthInitMessage(encoded);
   }
 
-  initWithStaticQR(String encoded) {
+  initWithStaticConnectRequest(String encoded) {
     onMessage();
     connect();
     // TODO: Implement this method
