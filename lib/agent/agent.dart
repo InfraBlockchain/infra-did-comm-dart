@@ -66,6 +66,15 @@ class InfraDIDCommAgent {
         print("Socket disconnected"),
       },
     );
+    onMessage();
+  }
+
+  void changeRole(String newRole) {
+    if (newRole == "HOLDER" || newRole == "VERIFIER") {
+      role = newRole;
+    } else {
+      throw Exception("Role must be HOLDER or VERIFIER");
+    }
   }
 
   /// Sets the callback function to be called when a DID authentication request is received.
@@ -91,7 +100,6 @@ class InfraDIDCommAgent {
 
   /// Initializes the agent by setting up message handling and connecting to the server.
   init() async {
-    onMessage();
     await connect();
   }
 
@@ -99,7 +107,6 @@ class InfraDIDCommAgent {
   ///
   /// [encoded] - The encoded connect request message.
   initWithConnectRequest(String encoded) async {
-    onMessage();
     await connect();
     sendDIDAuthInitMessage(encoded);
   }
@@ -108,7 +115,6 @@ class InfraDIDCommAgent {
   ///
   /// [encoded] - The encoded static connect request message.
   initWithStaticConnectRequest(String encoded) async {
-    onMessage();
     await connect();
     // TODO: Implement this method
   }
@@ -123,7 +129,6 @@ class InfraDIDCommAgent {
     int loopTimeSeconds,
     Function(String encodedMessage) loopCallback,
   ) {
-    onMessage();
     didConnectRequestLoop(this, context, loopTimeSeconds, loopCallback);
   }
 
