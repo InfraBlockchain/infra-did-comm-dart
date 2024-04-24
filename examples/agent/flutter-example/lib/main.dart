@@ -37,7 +37,12 @@ class _MyHomePageState extends State<MyHomePage> {
   String mnemonic =
       "bamboo absorb chief dog box envelope leisure pink alone service spin more";
   String did = "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z";
-  late InfraDIDCommAgent agent;
+  late InfraDIDCommAgent agent = InfraDIDCommAgent(
+    url: "http://data-market.test.newnal.com:9000",
+    did: did,
+    mnemonic: mnemonic,
+    role: "HOLDER",
+  );
 
   late QRViewController controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
@@ -51,35 +56,23 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void setClientWithHolderRole() {
-    agent = InfraDIDCommAgent(
-      url: "http://data-market.test.newnal.com:9000",
-      did: did,
-      mnemonic: mnemonic,
-      role: "HOLDER",
-    );
-    agent.onMessage();
-    agent.didConnectedCallback = (String peerDID) {
-      print("DID connected: $peerDID");
-      setState(() {
-        didConnected = true; // 연결되었음을 상태에 반영
-      });
-    };
+    agent.changeRole("HOLDER");
+    agent.setDIDConnectedCallback((peerDID) => {
+          print("DID connected1: $peerDID"),
+          setState(() {
+            didConnected = true; // 연결되었음을 상태에 반영
+          })
+        });
   }
 
   void setClientWithVerifierRole() {
-    agent = InfraDIDCommAgent(
-      url: "http://data-market.test.newnal.com:9000",
-      did: did,
-      mnemonic: mnemonic,
-      role: "VERIFIER",
-    );
-    agent.onMessage();
-    agent.didConnectedCallback = (String peerDID) {
-      print("DID connected: $peerDID");
-      setState(() {
-        didConnected = true; // 연결되었음을 상태에 반영
-      });
-    };
+    agent.changeRole("VERIFIER");
+    agent.setDIDConnectedCallback((peerDID) => {
+          print("DID connected2: $peerDID"),
+          setState(() {
+            didConnected = true; // 연결되었음을 상태에 반영
+          })
+        });
   }
 
   Future<void> connectWebsocket() async {
@@ -162,6 +155,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> qrScanOnPressed() async {
+    var scanArea = (MediaQuery.of(context).size.width < 400 ||
+            MediaQuery.of(context).size.height < 400)
+        ? 150.0
+        : 300.0;
+
     await Navigator.push(
       context,
       MaterialPageRoute(
@@ -171,6 +169,12 @@ class _MyHomePageState extends State<MyHomePage> {
               QRView(
                 key: qrKey,
                 onQRViewCreated: _onQRViewCreated,
+                overlay: QrScannerOverlayShape(
+                    borderColor: Colors.red,
+                    borderRadius: 10,
+                    borderLength: 30,
+                    borderWidth: 10,
+                    cutOutSize: scanArea),
               ),
               Align(
                 alignment: Alignment.topLeft,
