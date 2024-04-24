@@ -230,8 +230,7 @@ Check [example](./examples/socket-io) for more detail.
   agent.setDIDConnectedCallback(didConnectedCallback);
   agent.setDIDAuthFailedCallback(didAuthFailedCallback);
 
-  agent.onMessage();
-  agent.connect();
+  agent.init();
 ```
 
 ### Make Dynamic QR Code
