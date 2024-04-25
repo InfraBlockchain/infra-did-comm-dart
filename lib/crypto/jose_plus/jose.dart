@@ -230,11 +230,11 @@ abstract class JoseObject {
             });
           }
           var payload = getPayloadFor(key, header, r);
-
           if (payload != null) {
             return JosePayload(payload, _protectedHeaderFor(r));
-          }
+          } else {}
         } catch (e) {
+          print(e);
           // ignore
         }
       }

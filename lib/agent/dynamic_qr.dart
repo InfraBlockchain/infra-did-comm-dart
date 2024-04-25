@@ -55,7 +55,7 @@ Future<void> didConnectRequestLoop(
     );
 
     final encodedMessage =
-        didConnectRequestMessage.encode(CompressionLevel.json);
+        didConnectRequestMessage.encode(CompressionLevel.compactJSON);
 
     loopCallback(encodedMessage);
 

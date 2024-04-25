@@ -1,3 +1,5 @@
+import "dart:convert";
+
 import "package:infra_did_comm_dart/crypto/jose_plus/jwe.dart";
 import "package:infra_did_comm_dart/crypto/jose_plus/jwk.dart";
 import "package:jwk/jwk.dart";
@@ -13,30 +15,51 @@ String encryptJWE(
 
   var builder = JsonWebEncryptionBuilder();
   builder.stringContent = data;
+  builder.addRecipient(keyJwk, algorithm: "dir");
+  builder.encryptionAlgorithm = "A256GCM";
 
   if (epk != null) {
     var epkJwk = Jwk.fromJson(epk);
-    builder.addRecipient(keyJwk, algorithm: "ECDH-ES");
     builder.setProtectedHeader("epk", epkJwk.toJson());
-  } else {
-    builder.addRecipient(keyJwk, algorithm: "dir");
   }
 
-  builder.encryptionAlgorithm = "A256GCM";
-
   var jwe = builder.build();
-  return jwe.toCompactSerialization();
+  var split = jwe.toCompactSerialization().split(".");
+
+  if (epk != null) {
+    String jsonString = utf8.decode(base64Url.decode(split[0]));
+    var jsonObject = json.decode(jsonString);
+    jsonObject["alg"] = "ECDH-ES";
+    split[0] = base64Url.encode(utf8.encode(json.encode(jsonObject)));
+    if (split[0].length % 4 != 0) {
+      var paddingLength = 4 - (split[0].length % 4);
+      split[0] += "=" * paddingLength;
+    }
+  }
+
+  return split.join(".");
 }
 
 /// Decrypts the provided [jweCompact] using the specified [key].
 /// Returns the decrypted payload as a string.
 Future<String> decryptJWE(String jweCompact, Map<String, dynamic> key) async {
+  var split = jweCompact.split(".");
+  if (split[0].length % 4 != 0) {
+    var paddingLength = 4 - (split[0].length % 4);
+    split[0] += "=" * paddingLength;
+  }
+
+  String jsonString = utf8.decode(base64Url.decode(split[0]));
+  var jsonObject = json.decode(jsonString);
+  if (jsonObject["alg"] == "ECDH-ES") {
+    jsonObject["alg"] = "dir";
+    split[0] = base64Url.encode(utf8.encode(json.encode(jsonObject)));
+  }
+  var jweString = split.join(".");
+
   var keyJwk = JsonWebKey.fromJson(key);
-
-  var jwe = JsonWebEncryption.fromCompactSerialization(jweCompact);
-
+  var jwe = JsonWebEncryption.fromCompactSerialization(jweString);
   var keyStore = JsonWebKeyStore()..addKey(keyJwk);
-
   var payload = await jwe.getPayload(keyStore);
 
   return payload.stringContent;
