@@ -112,6 +112,7 @@ Future<void> messageHandler(
       }
     }
   } catch (e) {
+    print(e);
     agent.peerInfo.clear();
     sendDIDAuthFailedMessage(mnemonic, did, agent);
     agent.socket.disconnect();

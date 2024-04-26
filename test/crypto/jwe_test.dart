@@ -23,7 +23,7 @@ void main() {
 
   test("Should decrypt JWE with epk", () async {
     String jwe =
-        "eyJlcGsiOnsiY3J2IjoiWDI1NTE5Iiwia3R5IjoiT0tQIiwieCI6Il9MSFNmbXRXR3gtZW95NzFzWkQwN3BySVd1RnFtZEpRRVE2UlZSYkRVQTQifSwiZW5jIjoiQTI1NkdDTSIsImFsZyI6IkVDREgtRVMifQ..3RYYbk9FM4d9ss6D.E7SQthAsSbYU8fjNQA.NBeTGa_bzFJM0oLcwnbj6Q";
+        "eyJlcGsiOnsiY3J2IjoiWDI1NTE5Iiwia3R5IjoiT0tQIiwieCI6Il9MSFNmbXRXR3gtZW95NzFzWkQwN3BySVd1RnFtZEpRRVE2UlZSYkRVQTQifSwiZW5jIjoiQTI1NkdDTSIsImFsZyI6IkVDREgtRVMifQ==..Jqdn_CuaWkRAeuTP.6dG28r1Awl9sk-66Vw.MtQY1qAY1e25mIKwfiLbpA";
     String content = await decryptJWE(jwe, jwkJson);
     expect(content, isNotNull);
   });

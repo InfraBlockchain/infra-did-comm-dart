@@ -137,7 +137,6 @@ class JsonWebEncryption extends JoseObject {
     if (key == null) {
       return null;
     }
-
     var aad = sharedProtectedHeader?.toBase64EncodedString() ?? '';
     if (additionalAuthenticatedData != null) {
       aad += '.${String.fromCharCodes(additionalAuthenticatedData!)}';

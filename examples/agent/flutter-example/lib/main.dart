@@ -199,7 +199,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
-
+    agent.disconnect();
+    agent.connect();
     controller.scannedDataStream.listen((scanData) async {
       final currentScan = DateTime.now();
       if (lastScan == null ||
@@ -207,7 +208,7 @@ class _MyHomePageState extends State<MyHomePage> {
         lastScan = currentScan;
         String data = scanData.code!;
         print("Scanned data: $data");
-        await agent.initWithConnectRequest(data);
+        await agent.sendDIDAuthInitMessage(data);
       }
     });
   }
