@@ -259,7 +259,7 @@ void main() {
 
   test("Should decode encoded DID-Connect-Request Message", () {
     String encoded =
-        "eJxdUE1vgkAQ_S97piAfmpajItHQRMWYkl4I7g51Sthd2IliDP-9S-2px3nv5X3Mg9FdA4tZsk1WSkrglEPHHFb3qrWwQBGjrPsqnvnx_rQsM798zSAtTtkyf2s4tSFUtQnoq8vCYuCdkRvKddB8H0WdpEcZDtE5s368h4pAlIStjfMXiyCK_CiYOQwGjT2Yf0w4d9hZiTuLHwwlElak-un467vZvSfr3Bob6K_IYS2FVijJUhcibWLPuxnj_na3I1xUk1bxBmgrrMgPvP0lPBbX4jNbfRxShbfd_KDZaKsqSTDQFCZUW6G0cg30gq4Esi4VJ1QTyJ8PY-M4_gClkmuy";
+        "eyJ0eXBlIjoiRElEQ29ubmVjdFJlcSIsImZyb20iOiJkaWQ6aW5mcmE6MDE6UFVCX0sxXzhLZUZYVUtCUjlrY3RtM2VhZnMydGdxSzNYeGNxc25IdFJwMmtqU2RmREZTbjN4NGJLIiwiY3JlYXRlZF90aW1lIjoxNjYyNDQxNDIwLCJleHBpcmVzX3RpbWUiOjE2NjI0NDE0MzUsImJvZHkiOnsiaW5pdGlhdG9yIjp7InR5cGUiOiJIT0xERVIiLCJzZXJ2aWNlRW5kcG9pbnQiOiJodHRwczovL3dzcy5pbmZyYWRpZC5pbyIsInNvY2tldElkIjoiMTIvUGgzU1h2WFpLQ1dRRm9pd081UXAifSwiY29udGV4dCI6eyJkb21haW4iOiJwZXQtaS5uZXQiLCJhY3Rpb24iOiJjb25uZWN0In19fQ==";
 
     final message = {
       "type": "DIDConnectReq",
@@ -283,7 +283,7 @@ void main() {
 
   test("Should decode compact encoded DID-Connect-Request Message", () {
     String compactEncoded =
-        "eJxdj0FvgzAMhf-LzwxKoNWWY4vQphzWgqqhXRBNTJtVhECslarivy9st10s2c9-7_MD6G4ROGRv2a43BiUVOEAA7dh3fqy04tq0Y8NXMd8ft7WI62eBeXUU2-LlKqlLsGkdo_MgkmqSgzOvVFh2_SpVm-WlSab0JLyfHLEhVDXpzsfFmw1L0zhlqwBwsnpE909J1gGcenUH_gC9FLdQXois41F0cy78xfJ8oe69v9PK6zGL9pekrL6rT7H7OOS9vr2vDxZmD7CYLDsW6UmHBslfNb6Xf2_DPM8_6dlVtw==";
+        "eyJ0eXBlIjoiRElEQ29ubmVjdFJlcSIsImZyb20iOiJkaWQ6aW5mcmE6MDE6UFVCX0sxXzhLZUZYVUtCUjlrY3RtM2VhZnMydGdxSzNYeGNxc25IdFJwMmtqU2RmREZTbjN4NGJLIiwiY3JlYXRlZF90aW1lIjoxNjYyNDQxNDIwLCJleHBpcmVzX3RpbWUiOjE2NjI0NDE0MzUsImJvZHkiOnsiaSI6eyJzZSI6Imh0dHBzOi8vd3NzLmluZnJhZGlkLmlvIiwic2lkIjoiMTIvUGgzU1h2WFpLQ1dRRm9pd081UXAifSwiYyI6eyJkIjoicGV0LWkubmV0IiwiYSI6ImNvbm5lY3QifX19";
 
     final compactJson = {
       "type": "DIDConnectReq",
@@ -307,7 +307,7 @@ void main() {
 
   test("Should decode minimal compact encoded DID-Connect-Request Message", () {
     String minimalCompactEncoded =
-        "eJwVjFsLgjAYQP_L92wXXUHtUUOCPeQFafQiukstcfMyypD99_TlwIHDmUEOpgUMXHGstBwqvPdxUoQl8csTETEtSJidG2ZbJCo5BvbZE0Qn1o_6arMuaN45l5c412g61AQ8qA3_AZ5BrRgVX95-sEteKKcf-iDRPY2N-t6OaQfOA7ZWa9MJu1FbLeyyqBZnRmvBLDjn_iP8NJc=";
+        "eyJmcm9tIjoiZGlkOmluZnJhOjAxOlBVQl9LMV84S2VGWFVLQlI5a2N0bTNlYWZzMnRncUszWHhjcXNuSHRScDJralNkZkRGU24zeDRiSyIsImJvZHkiOnsiaSI6eyJzaWQiOiIxMi9QaDNTWHZYWktDV1FGb2l3TzVRcCJ9LCJjIjp7ImQiOiJwZXQtaS5uZXQiLCJhIjoiY29ubmVjdCJ9fX0=";
 
     final minimalCompactJson = {
       "from":
