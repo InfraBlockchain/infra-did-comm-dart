@@ -1,4 +1,5 @@
 import "dart:async";
+import "package:http/http.dart" as http;
 
 import "package:infra_did_comm_dart/agent/message_handler.dart";
 import "package:socket_io_client/socket_io_client.dart" as IO;
@@ -112,11 +113,37 @@ class InfraDIDCommAgent {
   }
 
   /// Initializes the agent with a static connect request message and connects to the server.
-  ///
-  /// [encoded] - The encoded static connect request message.
-  initWithStaticConnectRequest(String encoded) async {
+  initWithStaticConnectRequest(
+    String did,
+    String serviceEndpoint,
+    Context context,
+  ) async {
+    // Initialize with static connection only can be done by HOLDER
+    changeRole("HOLDER");
     await connect();
-    // TODO: Implement this method
+
+    int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    await Future.delayed(Duration(milliseconds: 500));
+    String socketId = (await this.socketId)!;
+
+    Initiator initiator = Initiator(
+      type: role,
+      serviceEndpoint: url,
+      socketId: socketId,
+    );
+
+    DIDConnectRequestMessage didConnectRequestMessage =
+        DIDConnectRequestMessage(
+      from: did,
+      createdTime: currentTime,
+      expiresTime: currentTime + 30000,
+      context: context,
+      initiator: initiator,
+    );
+    final encodedMessage =
+        didConnectRequestMessage.encode(CompressionLevel.compactJSON);
+
+    await http.get(Uri.parse("$serviceEndpoint?data=$encodedMessage"));
   }
 
   /// Initializes the agent with a DID request message loop and connects to the server.
