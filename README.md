@@ -27,226 +27,31 @@ dart pub add infra_did_comm_dart --git-url=https://github.com/InfraBlockchain/in
 
 Get more examples in [examples](./examples) and [test](./test) folder.
 
-### Make DID-Connect-Request Message
+### Holder & Verifier
 
-```dart
-    int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    Context context = Context(
-      domain: "some-domain",
-      action: "connect",
-    );
-    Initiator initiator = Initiator(
-      type: "HOLDER",
-      serviceEndpoint: "http://localhost:8000",
-      socketId: "3C9SxnIcgKlIvN00AAFm",
-    );
-```
-
-### Make DID-Auth-Init Message
-
-```dart
-    int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    Context context = Context(
-      domain: "some-domain",
-      action: "connect",
-    );
-    var uuid = Uuid();
-    var id = uuid.v4();
-    DIDAuthInitMessage didAuthInitMessage = DIDAuthInitMessage(
-      id: id,
-      from: "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
-      to: ["did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z"],
-      createdTime: currentTime,
-      expiresTime: currentTime + 30000,
-      context: context,
-      socketId: "3C9SxnIcgKlIvN00AAFm",
-      peerSocketId: "O2kcsMxfKsh5gKFzAAFW",
-    );
-```
-
-### Make DID-Auth Message
-
-```dart
-   int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    Context context = Context(
-      domain: "some-domain",
-      action: "connect",
-    );
-    var uuid = Uuid();
-    var id = uuid.v4();
-    DIDAuthMessage didAuthMessage = DIDAuthMessage(
-      id: id,
-      from: "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
-      to: ["did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z"],
-      createdTime: currentTime,
-      expiresTime: currentTime + 30000,
-      context: context,
-      socketId: "3C9SxnIcgKlIvN00AAFm",
-      peerSocketId: "O2kcsMxfKsh5gKFzAAFW",
-    );
-```
-
-### Make DID-Connected Message
-
-```dart
-    int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    Context context = Context(
-      domain: "some-domain",
-      action: "connect",
-    );
-    var uuid = Uuid();
-    var id = uuid.v4();
-    DIDConnectedMessage didConnectedMessage = DIDConnectedMessage(
-      id: id,
-      from: "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
-      to: ["did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z"],
-      createdTime: currentTime,
-      expiresTime: currentTime + 30000,
-      context: context,
-      status: "Connected",
-    );
-```
-
-### Make DID-Auth-Failed Message
-
-```dart
-    int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    Context context = Context(
-      domain: "some-domain",
-      action: "connect",
-    );
-    var uuid = Uuid();
-    var id = uuid.v4();
-    DIDAuthFailedMessage didAuthFailedMessage = DIDAuthFailedMessage(
-      id: id,
-      from: "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
-      to: ["did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z"],
-      createdTime: currentTime,
-      expiresTime: currentTime + 30000,
-      context: context,
-      reason: "Invalid Signature",
-    );
-```
-
-### Sign / Verify JWS
-
-```dart
-String data = "Hello, World!";
-String token = signJWS(data, privateKey);
-
-var payload = verifyJWS(token, publicKey);
-```
-
-### Encrypt / Decrypt JWE
-
-* With epk
-
-```dart
-  String bobSeed =
-      "bamboo absorb chief dog box envelope leisure pink alone service spin more";
-  List<int> bobPrivatekey = await privateKeyFromUri(bobSeed);
-  List<int> bobPublicKey = await publicKeyFromUri(bobSeed);
-
-  final ephemeralKeyPair = await generateX25519EphemeralKeyPair();
-  List<int> ephemeralPrivateKey = ephemeralKeyPair.$1;
-  List<int> ephemeralPublicKey = ephemeralKeyPair.$2;
-
-  List<int> sharedKey = await makeSharedKey(
-    ephemeralPrivateKey,
-    publicKeyfromX25519Jwk(bobX25519JwkPublicKey),
-  );
-
-  String data = "Hello, World!";
-  String jweCompact = encryptJWE(data, jwkFromSharedKey(sharedKey), epk: x25519JwkFromX25519PublicKey(ephemeralPublicKey));
-  String content = await decryptJWE(jweCompact, sharedKey);
-```
-
-* Without epk
-
-```dart
-  var jwkJson = {
-    "kty": "oct",
-    "k": "DyeSbxbuMmOArQWVriSFQ_BwI2m85_jZktOOVG1U2RA",
-    "alg": "A256GCM",
-  };
-
-    String data = "Hello, World!";
-    String jweCompact = encryptJWE(data, jwkJson);
-    String content = await decryptJWE(content, jwkJson);
-```
-
-### Convert Key Ed25519 to X25519
-
-```dart
-  String bobSeed =
-      "bamboo absorb chief dog box envelope leisure pink alone service spin more";
-  List<int> bobPrivatekey = await privateKeyFromUri(bobSeed);
-  List<int> bobPublicKey = await publicKeyFromUri(bobSeed);
-
-  Map<String, dynamic> bobX25519JwkPrivateKey =
-      await x25519JwkFromEd25519PrivateKey(bobPrivatekey);
-  Map<String, dynamic> bobX25519JwkPublicKey =
-      x25519JwkFromEd25519PublicKey(bobPublicKey);
-
-  print(publicKeyfromX25519Jwk(bobX25519JwkPrivateKey));
-  print(publicKeyfromX25519Jwk(bobX25519JwkPublicKey));
-  print(privateKeyfromX25519Jwk(bobX25519JwkPrivateKey));
-```
-
-### Make shared key using ECDH-ES
-
-```dart
- // Using X25519 key
-  String sk1 =
-      "c01846b3121b359fc3811d9ba89d7881da2076f496dcc6e9a8123c0213f90d5f";
-  String pk1 =
-      "fa87cf7d2988d12264cb0b42a078dc5807e48fa1efb33f5fae2fb4f0e6940661";
-
-  String sk2 =
-      "90036ddffe69bb848350e944fa500157859dbca82b171732e8f5c1d9f1c13e63";
-  String pk2 =
-      "87bd990f3c7784fbdc93ef45bd967e5f1cbe1b082e9aedc9d305b877f1c50273";
-    final sharedKey1 = await makeSharedKey(hex.decode(sk1), hex.decode(pk2));
-    final sharedKey2 = await makeSharedKey(hex.decode(sk2), hex.decode(pk1));
-```
-
-### Connect to Websocket Server
-
-Check [example](./examples/socket-io) for more detail.
-
-```dart
-  String mnemonic =
-      "bamboo absorb chief dog box envelope leisure pink alone service spin more";
-  String did = "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z";
-  InfraDIDCommAgent agent = InfraDIDCommAgent(
-    "http://data-market.test.newnal.com:9000",
-    did: did,
-    mnemonic: mnemonic,
-    role: "HOLDER", // HOLDER or VERIFIER
-  );
-
-  agent.setDIDAuthInitCallback(didAuthInitCallback);
-  agent.setDIDAuthCallback(didAuthCallback);
-  agent.setDIDConnectedCallback(didConnectedCallback);
-  agent.setDIDAuthFailedCallback(didAuthFailedCallback);
-
-  agent.init();
-```
-
-### Make Dynamic QR Code
+* Holder
 
 ```dart
 import "package:infra_did_comm_dart/infra_did_comm_dart.dart";
 
-void callback(String encodedMessage) {
-  final currentTime = DateTime.now().toIso8601String();
-  print("$currentTime: $encodedMessage");
-  final decoded = DIDConnectRequestMessage.decode(encodedMessage);
-  print(decoded.toJson());
-  print("===================================");
+bool didAuthCallback(String peerDID) {
+  print("DID Auth Callback");
+  return true;
+}
+
+void didConnectedCallback(String peerDID) {
+  print("DID Connected Callback");
+}
+
+void didAuthFailedCallback(String peerDID) {
+  print("DID Auth Failed Callback");
 }
 
 main() async {
+  initiatedByHolderScenario();
+}
+
+initiatedByHolderScenario() async {
   String mnemonic =
       "bamboo absorb chief dog box envelope leisure pink alone service spin more";
   String did = "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z";
@@ -256,18 +61,76 @@ main() async {
     mnemonic: mnemonic,
     role: "HOLDER",
   );
-  final contextJson = {
-    "domain": "infraDID",
-    "action": "connect",
-  };
-  final context = Context.fromJson(contextJson);
-  int loopTimeSeconds = 15;
 
-  didConnectRequestLoop(
-    client,
-    context,
-    loopTimeSeconds,
-    callback,
+  agent.setDIDAuthCallback(didAuthCallback);
+  agent.setDIDConnectedCallback(didConnectedCallback);
+  agent.setDIDAuthFailedCallback(didAuthFailedCallback);
+
+  agent.init();
+
+  String? socketId = await agent.socketId;
+  if (socketId != null) {
+    String holderSocketId = socketId;
+    final minimalCompactJson = {
+      "from": "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
+      "body": {
+        "i": {"sid": holderSocketId},
+        "c": {"d": "pet-i.net", "a": "connect"},
+      },
+    };
+    final didConnectRequestMessage =
+        DIDConnectRequestMessage.fromJson(minimalCompactJson);
+
+    String encoded = didConnectRequestMessage.encode(CompressionLevel.json);
+    print("Holder make encoded request message: $encoded");
+  } else {
+    print("Socket ID is null");
+  }
+}
+```
+
+* Verifier
+
+```dart
+import "package:infra_did_comm_dart/infra_did_comm_dart.dart";
+
+bool didAuthCallback(String peerDID) {
+  print("DID Auth Callback");
+  return true;
+}
+
+void didConnectedCallback(String peerDID) {
+  print("DID Connected Callback");
+}
+
+void didAuthFailedCallback(String peerDID) {
+  print("DID Auth Failed Callback");
+}
+
+main() async {
+  String encoded = "" // Get from Holder
+  initiatedByHolderScenario(encoded);
+}
+
+initiatedByHolderScenario(String encoded) async {
+  String mnemonic =
+      "bamboo absorb chief dog box envelope leisure pink alone service spin more";
+  String did = "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z";
+  InfraDIDCommAgent agent = InfraDIDCommAgent(
+    url: "http://data-market.test.newnal.com:9000",
+    did: did,
+    mnemonic: mnemonic,
+    role: "VERIFIER",
   );
+
+  agent.setDIDAuthCallback(didAuthCallback);
+  agent.setDIDConnectedCallback(didConnectedCallback);
+  agent.setDIDAuthFailedCallback(didAuthFailedCallback);
+
+  agent.init();
+  await agent.sendDIDAuthInitMessage(encoded);
+  if(agent.isConnected){
+    print("DID Connected");
+  }
 }
 ```
