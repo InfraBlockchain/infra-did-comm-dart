@@ -1,6 +1,7 @@
 name: infra_did_comm_dart
 description: Communication Protocol using Infra DID
 version: 0.0.1
+homepage:  https://github.com/InfraBlockchain/infra-did-comm-dart
 repository: https://github.com/InfraBlockchain/infra-did-comm-dart
 
 environment:
