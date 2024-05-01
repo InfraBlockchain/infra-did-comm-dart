@@ -216,12 +216,10 @@ class _MyHomePageState extends State<MyHomePage> {
           final decoded = base64.decode(data);
           final jsonString = utf8.decode(decoded);
           var decodedJson = jsonDecode(jsonString);
-          var did = decodedJson["did"];
           var serviceEndpoint = decodedJson["serviceEndpoint"];
           var context = Context.fromJson(decodedJson["context"]);
 
-          await agent.initWithStaticConnectRequest(
-              did, serviceEndpoint, context);
+          await agent.initWithStaticConnectRequest(serviceEndpoint, context);
         }
       }
     });
