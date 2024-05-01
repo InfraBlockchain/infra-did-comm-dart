@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:infra_did_comm_dart/infra_did_comm_dart.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
@@ -208,7 +210,19 @@ class _MyHomePageState extends State<MyHomePage> {
         lastScan = currentScan;
         String data = scanData.code!;
         print("Scanned data: $data");
-        await agent.sendDIDAuthInitMessage(data);
+        if (data.contains("..")) {
+          await agent.sendDIDAuthInitMessage(data);
+        } else {
+          final decoded = base64.decode(data);
+          final jsonString = utf8.decode(decoded);
+          var decodedJson = jsonDecode(jsonString);
+          var did = decodedJson["did"];
+          var serviceEndpoint = decodedJson["serviceEndpoint"];
+          var context = Context.fromJson(decodedJson["context"]);
+
+          await agent.initWithStaticConnectRequest(
+              did, serviceEndpoint, context);
+        }
       }
     });
   }
