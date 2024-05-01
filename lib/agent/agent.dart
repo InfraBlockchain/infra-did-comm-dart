@@ -114,10 +114,17 @@ class InfraDIDCommAgent {
 
   /// Initializes the agent with a static connect request message and connects to the server.
   initWithStaticConnectRequest(
-    String did,
     String serviceEndpoint,
-    Context context,
-  ) async {
+    Context context, {
+    String? peerDID,
+    bool Function(String peerDID)? didVerification,
+  }) async {
+    if (peerDID != null && didVerification != null) {
+      if (!didVerification(peerDID)) {
+        throw Exception("DID verification failed");
+      }
+    }
+
     // Initialize with static connection only can be done by HOLDER
     changeRole("HOLDER");
     await connect();
