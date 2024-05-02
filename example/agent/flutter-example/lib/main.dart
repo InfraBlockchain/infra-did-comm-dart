@@ -210,15 +210,14 @@ class _MyHomePageState extends State<MyHomePage> {
         lastScan = currentScan;
         String data = scanData.code!;
         print("Scanned data: $data");
-        if (data.contains("..")) {
+        final decoded = base64.decode(data);
+        final jsonString = utf8.decode(decoded);
+        Map<String, dynamic> decodedJson = jsonDecode(jsonString);
+        if (decodedJson.containsKey("from")) {
           await agent.sendDIDAuthInitMessage(data);
         } else {
-          final decoded = base64.decode(data);
-          final jsonString = utf8.decode(decoded);
-          var decodedJson = jsonDecode(jsonString);
           var serviceEndpoint = decodedJson["serviceEndpoint"];
           var context = Context.fromJson(decodedJson["context"]);
-
           await agent.initWithStaticConnectRequest(serviceEndpoint, context);
         }
       }
