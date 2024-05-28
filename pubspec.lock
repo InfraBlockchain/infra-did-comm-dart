@@ -49,6 +49,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.11.0"
+  base_codecs:
+    dependency: transitive
+    description:
+      name: base_codecs
+      sha256: "41701a12ede9912663decd708279924ece5018566daa7d1f484d5f4f10894f91"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   base_x:
     dependency: transitive
     description:
@@ -73,6 +81,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  bs58:
+    dependency: transitive
+    description:
+      name: bs58
+      sha256: "3ed24dadf386ca749ff50af678be1131ef569a3583a6f37b87b90c032270c767"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.2"
+  bs58check:
+    dependency: transitive
+    description:
+      name: bs58check
+      sha256: c4a164d42b25c2f6bc88a8beccb9fc7d01440f3c60ba23663a20a70faf484ea9
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.2"
   clock:
     dependency: "direct main"
     description:
@@ -113,6 +137,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.3"
+  crypto_keys:
+    dependency: transitive
+    description:
+      name: crypto_keys
+      sha256: acc19abf34623d990a0e8aec69463d74a824c31f137128f42e2810befc509ad0
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.0+1"
   crypto_keys_plus:
     dependency: "direct main"
     description:
@@ -137,6 +169,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.13.0"
+  ecdsa:
+    dependency: transitive
+    description:
+      name: ecdsa
+      sha256: dd1efbaf6c18bfde9347dddcfe10dce3dd044e5a1b237457a49b5c24850dfb95
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.4"
   ed25519_edwards:
     dependency: transitive
     description:
@@ -153,6 +193,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  elliptic:
+    dependency: transitive
+    description:
+      name: elliptic
+      sha256: "98e2fa89a714c649174553c823db2612dc9581814477fe1264a499d448237b6b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.10"
+  eosdart_ecc:
+    dependency: transitive
+    description:
+      name: eosdart_ecc
+      sha256: "993d52a774975d1e3692583ff9cdab9a08048bdbe9d916d40c04ca9c1e6dfe96"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.4"
   equatable:
     dependency: transitive
     description:
@@ -209,6 +265,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
+  hashlib_codecs:
+    dependency: transitive
+    description:
+      name: hashlib_codecs
+      sha256: a1c7b5d89ff29e81fd8e8c0b35966db4c935e149fc4ebe1ebf71e358c15863ab
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.0"
+  hex:
+    dependency: transitive
+    description:
+      name: hex
+      sha256: "4e7cd54e4b59ba026432a6be2dd9d96e4c5205725194997193bf871703b82c4a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   http:
     dependency: "direct main"
     description:
@@ -233,6 +305,23 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
+  infra_did_dart:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: "feature/chain"
+      resolved-ref: "9fcaaf53a76fe7f1c8e9c3ca8447f84f7e1a09d7"
+      url: "https://github.com/InfraBlockchain/infra-did-dart.git"
+    source: git
+    version: "1.0.0"
+  intl:
+    dependency: transitive
+    description:
+      name: intl
+      sha256: "3bc132a9dbce73a7e4a21a17d06e1878839ffbf975568bc875c60537824b0c4d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.18.1"
   io:
     dependency: transitive
     description:
@@ -241,6 +330,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.4"
+  iregexp:
+    dependency: transitive
+    description:
+      name: iregexp
+      sha256: "143859dcaeecf6f683102786762d70a47ef8441a0d2287a158172d32d38799cf"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.2"
+  jose:
+    dependency: transitive
+    description:
+      name: jose
+      sha256: "7955ec5d131960104e81fbf151abacb9d835c16c9e793ed394b2809f28b2198d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.4"
   js:
     dependency: transitive
     description:
@@ -249,6 +354,46 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.7"
+  json_annotation:
+    dependency: transitive
+    description:
+      name: json_annotation
+      sha256: "1ce844379ca14835a50d2f019a3099f419082cfdd231cd86a142af94dd5c6bb1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.9.0"
+  json_ld_processor:
+    dependency: transitive
+    description:
+      name: json_ld_processor
+      sha256: "7477a7be11c443752039575cd27f1abfd236a1f56074ba439def9688178f3a1b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.4"
+  json_path:
+    dependency: transitive
+    description:
+      name: json_path
+      sha256: "93f2cb012eb37112e62d3b5e5eb535431beb4c2566a9c1987b079b13b308763b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.6"
+  json_schema:
+    dependency: transitive
+    description:
+      name: json_schema
+      sha256: f1bcf81647c347f53281dca9c8ea3e2b7b4d0eee5b4d1e4cee3173a5c162f358
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.1.7"
+  json_schema2:
+    dependency: transitive
+    description:
+      name: json_schema2
+      sha256: "094e60d3605333c0816eeb2e5310b4f71ffaea2c0abc026b27418c1ac41a5db3"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.4+9"
   jwk:
     dependency: "direct main"
     description:
@@ -281,6 +426,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.12.16+1"
+  maybe_just_nothing:
+    dependency: transitive
+    description:
+      name: maybe_just_nothing
+      sha256: "0c06326e26d08f6ed43247404376366dc4d756cef23a4f1db765f546224c35e0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.3"
   merlin:
     dependency: transitive
     description:
@@ -305,6 +458,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
+  ninja_asn1:
+    dependency: transitive
+    description:
+      name: ninja_asn1
+      sha256: b0f04877243fda51c475ec2bcaadb55a92759baee9f02888124c60775760ccf7
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   node_preamble:
     dependency: transitive
     description:
@@ -329,6 +490,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.9.0"
+  petitparser:
+    dependency: transitive
+    description:
+      name: petitparser
+      sha256: c15605cd28af66339f8eb6fbe0e541bfe2d1b72d5825efc6598f3e0a31b9ad27
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.2"
   pinenacl:
     dependency: "direct main"
     description:
@@ -345,6 +514,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.8.0"
+  polkadart:
+    dependency: transitive
+    description:
+      name: polkadart
+      sha256: "4be169198d7938aec035eacead499b469795ccc9797589bb2df5b2ec6bd52535"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.3"
   polkadart_keyring:
     dependency: "direct main"
     description:
@@ -385,6 +562,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.2.1"
+  rest_client:
+    dependency: transitive
+    description:
+      name: rest_client
+      sha256: ff26b0dd3b0dac951014ce1ea0da450290cb80a4bfee905a43285fd34cb3aa65
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.3+2"
+  rfc_6901:
+    dependency: transitive
+    description:
+      name: rfc_6901
+      sha256: df1bbfa3d023009598f19636d6114c6ac1e0b7bb7bf6a260f0e6e6ce91416820
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   ristretto255:
     dependency: transitive
     description:
@@ -393,6 +586,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  secp256k1:
+    dependency: transitive
+    description:
+      name: secp256k1
+      sha256: "66310c1fce68d0c3cfae61f9f23aba11f459fb8c84a50bdc6520548c62a4828a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.0"
   secp256k1_ecdsa:
     dependency: transitive
     description:
@@ -529,6 +730,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.4.0"
+  substrate_metadata:
+    dependency: transitive
+    description:
+      name: substrate_metadata
+      sha256: "4557950c7dcea17cdf7e1224ac7822ab38dd9658f000be6d58b4a41b0a8126d4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   term_glyph:
     dependency: transitive
     description:
@@ -577,6 +786,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.0"
+  uri:
+    dependency: transitive
+    description:
+      name: uri
+      sha256: "889eea21e953187c6099802b7b4cf5219ba8f3518f604a1033064d45b1b8268a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
+  utility:
+    dependency: transitive
+    description:
+      name: utility
+      sha256: "200d264c3804e87da7ea36aa81bd73fb845d2cb7b2e820f3f357a0a2bd4e37f5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.3"
   uuid:
     dependency: "direct main"
     description:
@@ -625,6 +850,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.1"
+  x509:
+    dependency: transitive
+    description:
+      name: x509
+      sha256: "3262dc9a7d45b0876f886c01bfc7d5e765704f7dfd31f8cf5224fc875c17a6c6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.4+2"
   x509_plus:
     dependency: "direct main"
     description:
@@ -641,5 +874,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.2"
+  yaon:
+    dependency: transitive
+    description:
+      name: yaon
+      sha256: "7ffb8284eb13e448fdabf340209c306336cfeabdca97294c27b5a11237eaa3c4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.4+10"
 sdks:
   dart: ">=3.3.0 <4.0.0"

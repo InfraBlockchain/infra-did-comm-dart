@@ -26,6 +26,10 @@ dependencies:
   cryptography: ^2.7.0
   pinenacl: ^0.5.1
   socket_io_client: ^2.0.3+1
+  infra_did_dart:
+    git:
+      url: https://github.com/InfraBlockchain/infra-did-dart.git
+      ref: feature/chain
 
 dev_dependencies:
   lints: ^3.0.0
