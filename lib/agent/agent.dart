@@ -117,6 +117,10 @@ class InfraDIDCommAgent {
     vpRequestCallback = callback;
   }
 
+  void setVPLaterCallbackEndpoint(String vpLaterCallbackEndpoint) {
+    vpLaterCallbackEndpoint = vpLaterCallbackEndpoint;
+  }
+
   /// Initializes the agent by setting up message handling and connecting to the server.
   init() async {
     await connect();
@@ -255,34 +259,62 @@ class InfraDIDCommAgent {
     print("DIDAuthInitMessage sent to $peerSocketId");
   }
 
-  Future<void> sendVPRequestMessage(VPRequestMessage message) async {
-    vpChallenge = message.challenge;
+  Future<void> sendVPRequestMessage(
+    List<RequestVC> vcs,
+    String challenge,
+  ) async {
+    vpChallenge = challenge;
+
+    int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    var uuid = Uuid();
+    var id = uuid.v4();
+    String receiverDID = peerInfo["did"]!;
+    VPRequestMessage vpRequestMessage = VPRequestMessage(
+      id: id,
+      from: did,
+      to: [receiverDID],
+      createdTime: currentTime,
+      expiresTime: currentTime + 30000,
+      vcs: vcs,
+      challenge: challenge,
+    );
 
     String peerSocketId = peerInfo["socketId"]!;
-    Map<String, dynamic> jsonMessage = message.toJson();
-    String stringMessage = json.encode(jsonMessage);
-
-    String receiverAddress = message.to[0].split(":").last;
-    List<int> extendedPrivatekey = await extendedPrivateKeyFromUri(mnemonic);
-    List<int> privatekey = await privateKeyFromUri(mnemonic);
-    List<int> receiverpublicKey =
-        publicKeyFromAddress(receiverAddress.split(":").last);
-
-    Map<String, dynamic> x25519JwkPrivateKey =
-        await x25519JwkFromEd25519PrivateKey(privatekey);
-    Map<String, dynamic> x25519JwkReceiverPublicKey =
-        x25519JwkFromEd25519PublicKey(receiverpublicKey);
-
-    String jws = signJWS(
-      stringMessage,
-      hex.encode(extendedPrivatekey),
+    String jwe = await makeJWEFromMessage(
+      mnemonic,
+      receiverDID,
+      this,
+      vpRequestMessage.toJson(),
     );
-    List<int> sharedKey = await makeSharedKey(
-      privateKeyfromX25519Jwk(x25519JwkPrivateKey),
-      publicKeyfromX25519Jwk(x25519JwkReceiverPublicKey),
-    );
-    String jwe = encryptJWE(jws, jwkFromSharedKey(sharedKey));
     socket.emit("message", {"to": peerSocketId, "m": jwe});
     print("VPRequestMessage sent to $peerSocketId");
   }
+}
+
+Future<String> makeJWEFromMessage(
+  String mnemonic,
+  String receiverDID,
+  InfraDIDCommAgent agent,
+  Map<String, dynamic> jsonMessage,
+) async {
+  List<int> extendedPrivatekey = await extendedPrivateKeyFromUri(mnemonic);
+  List<int> privatekey = await privateKeyFromUri(mnemonic);
+  List<int> receiverpublicKey =
+      publicKeyFromAddress(receiverDID.split(":").last);
+
+  Map<String, dynamic> x25519JwkPrivateKey =
+      await x25519JwkFromEd25519PrivateKey(privatekey);
+  Map<String, dynamic> x25519JwkReceiverPublicKey =
+      x25519JwkFromEd25519PublicKey(receiverpublicKey);
+
+  String jws = signJWS(
+    json.encode(jsonMessage),
+    hex.encode(extendedPrivatekey),
+  );
+  List<int> sharedKey = await makeSharedKey(
+    privateKeyfromX25519Jwk(x25519JwkPrivateKey),
+    publicKeyfromX25519Jwk(x25519JwkReceiverPublicKey),
+  );
+  String jwe = encryptJWE(jws, jwkFromSharedKey(sharedKey));
+  return jwe;
 }
