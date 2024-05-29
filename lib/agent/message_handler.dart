@@ -152,7 +152,7 @@ Future<void> messageHandler(
             }
           }
           if (jwsPayload["type"] == "SubmitVP") {
-            bool isVerified = await verifyVPInSubmitVPMessage(
+            bool isVerified = await verifyVP(
               jwsPayload["body"]["vp"],
               agent.vpChallenge,
             );
@@ -304,11 +304,12 @@ Future<void> sendSubmitVPResponseMessage(
   print("SubmitVPResponseMessage sent to $receiverSocketId");
 }
 
-Future<bool> verifyVPInSubmitVPMessage(
+Future<bool> verifyVP(
   String encodedVP,
   String challenge,
 ) async {
-  Map<String, dynamic> vp = json.decode(encodedVP);
+  String jsonStringVP = utf8.decode(base64Url.decode(encodedVP));
+  Map<String, dynamic> vp = json.decode(jsonStringVP);
   if (vp["proof"]["challenge"] != challenge) {
     return false;
   }
