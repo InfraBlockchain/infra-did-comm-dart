@@ -4,6 +4,13 @@ import "dart:convert";
 
 import "package:convert/convert.dart";
 import "package:infra_did_comm_dart/infra_did_comm_dart.dart";
+import "package:infra_did_comm_dart/messages/reject_request_vp_message.dart";
+import "package:infra_did_comm_dart/messages/reject_request_vp_response_message.dart";
+import "package:infra_did_comm_dart/messages/submit_vp_message.dart";
+import "package:infra_did_comm_dart/messages/submit_vp_response_message.dart";
+import "package:infra_did_comm_dart/messages/submut_vp_later_message.dart";
+import "package:infra_did_comm_dart/messages/submut_vp_later_response_message.dart";
+import "package:infra_did_comm_dart/messages/vp_request_message.dart";
 import "package:socket_io_client/socket_io_client.dart" as IO;
 import "package:uuid/uuid.dart";
 
@@ -31,6 +38,10 @@ Future<void> messageHandler(
   bool Function(String peerDID)? didAuthCallback,
   Function(String peerDID)? didConnectedCallback,
   Function(String peerDID)? didAuthFailedCallback,
+  Map<String, dynamic> Function(
+    List<RequestVC> requestVCs,
+    String challenge,
+  )? vpRequestCallback,
 ) async {
   try {
     Map<String, dynamic> header = extractJWEHeader(jwe);
@@ -108,6 +119,78 @@ Future<void> messageHandler(
             print("DIDAuthFailed Message Received");
             agent.disconnect();
           }
+          if (jwsPayload["type"] == "VPReq") {
+            if (vpRequestCallback != null) {
+              Map<String, dynamic> result = vpRequestCallback(
+                (jwsPayload["body"]["VCs"] as List<dynamic>)
+                    .map<RequestVC>((vc) => RequestVC.fromJson(vc))
+                    .toList(),
+                jwsPayload["body"]["challenge"],
+              );
+              var status = result["status"] as String;
+              if (status == VPRequestResponseType.submitNow.name) {
+                var vp = result["vp"] as String;
+                await sendSubmitVPMessage(
+                  mnemonic,
+                  did,
+                  agent,
+                  VPRequestMessage.fromJson(jwsPayload),
+                  vp,
+                );
+              } else if (status == VPRequestResponseType.reject.name) {
+                var reason = result["reason"] as String?;
+                await sendRejectRequestVPMessage(mnemonic, did, agent,
+                    VPRequestMessage.fromJson(jwsPayload), reason);
+              } else if (status == VPRequestResponseType.submitLater.name) {
+                await sendSubmitVPLaterMessage(
+                  mnemonic,
+                  did,
+                  agent,
+                  VPRequestMessage.fromJson(jwsPayload),
+                );
+              }
+            }
+          }
+          if (jwsPayload["type"] == "SubmitVP") {
+            bool isVerified = await verifyVPInSubmitVPMessage(
+              jwsPayload["body"]["vp"],
+              agent.vpChallenge,
+            );
+
+            await sendSubmitVPResponseMessage(
+              mnemonic,
+              did,
+              agent,
+              SubmitVPMessage.fromJson(jwsPayload),
+              isVerified,
+            );
+          }
+          if (jwsPayload["type"] == "SubmitVPRes") {
+            print("SubmitVPRes Message Received");
+          }
+          if (jwsPayload["type"] == "RejectReqVP") {
+            await sendRejectRequestVPResponseMessage(
+              mnemonic,
+              did,
+              agent,
+              RejectRequestVPMessage.fromJson(jwsPayload),
+            );
+          }
+          if (jwsPayload["type"] == "RejectReqVPRes") {
+            print("RejectReqVPRes Message Received");
+          }
+          if (jwsPayload["type"] == "SubmitVPLater") {
+            await sendSubmitVPLaterResponseMessage(
+              mnemonic,
+              did,
+              agent,
+              SubmitVPLaterMessage.fromJson(jwsPayload),
+              agent.vpLaterCallbackEndpoint,
+            );
+          }
+          if (jwsPayload["type"] == "SubmitVPLaterRes") {
+            print("SubmitVPLaterRes Message Received");
+          }
         }
       }
     }
@@ -117,6 +200,151 @@ Future<void> messageHandler(
     sendDIDAuthFailedMessage(mnemonic, did, agent);
     agent.socket.disconnect();
   }
+}
+
+Future<void> sendSubmitVPLaterResponseMessage(
+  String mnemonic,
+  String did,
+  InfraDIDCommAgent agent,
+  SubmitVPLaterMessage submitVPLaterMessage,
+  String vpLaterCallbackEndpoint,
+) async {
+  int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+  var uuid = Uuid();
+  var id = uuid.v4();
+  SubmitVPLaterResponseMessage submitVPLaterResponseMessage =
+      SubmitVPLaterResponseMessage(
+    id: id,
+    from: did,
+    to: [submitVPLaterMessage.from],
+    createdTime: currentTime,
+    expiresTime: currentTime + 30000,
+    ack: [submitVPLaterMessage.id],
+    callbackUrl: vpLaterCallbackEndpoint,
+  );
+
+  String? receiverSocketId = agent.peerInfo["socketId"];
+  String receiverDID = submitVPLaterMessage.from;
+
+  List<int> extendedPrivatekey = await extendedPrivateKeyFromUri(mnemonic);
+  List<int> privatekey = await privateKeyFromUri(mnemonic);
+  List<int> receiverpublicKey =
+      publicKeyFromAddress(receiverDID.split(":").last);
+
+  Map<String, dynamic> x25519JwkPrivateKey =
+      await x25519JwkFromEd25519PrivateKey(privatekey);
+  Map<String, dynamic> x25519JwkReceiverPublicKey =
+      x25519JwkFromEd25519PublicKey(receiverpublicKey);
+
+  String jws = signJWS(
+    json.encode(submitVPLaterResponseMessage.toJson()),
+    hex.encode(extendedPrivatekey),
+  );
+  List<int> sharedKey = await makeSharedKey(
+    privateKeyfromX25519Jwk(x25519JwkPrivateKey),
+    publicKeyfromX25519Jwk(x25519JwkReceiverPublicKey),
+  );
+  String jwe = encryptJWE(jws, jwkFromSharedKey(sharedKey));
+  agent.socket.emit("message", {"to": receiverSocketId, "m": jwe});
+  print("SubmitVPLaterResponseMessage sent to $receiverSocketId");
+}
+
+Future<void> sendRejectRequestVPResponseMessage(
+  String mnemonic,
+  String did,
+  InfraDIDCommAgent agent,
+  RejectRequestVPMessage rejectRequestVPMessage,
+) async {
+  int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+  var uuid = Uuid();
+  var id = uuid.v4();
+  RejectRequestVPResponseMessage rejectRequestVPResponseMessage =
+      RejectRequestVPResponseMessage(
+    id: id,
+    from: did,
+    to: [rejectRequestVPMessage.from],
+    createdTime: currentTime,
+    expiresTime: currentTime + 30000,
+    ack: [rejectRequestVPMessage.id],
+  );
+
+  String? receiverSocketId = agent.peerInfo["socketId"];
+  String receiverDID = rejectRequestVPMessage.from;
+
+  List<int> extendedPrivatekey = await extendedPrivateKeyFromUri(mnemonic);
+  List<int> privatekey = await privateKeyFromUri(mnemonic);
+  List<int> receiverpublicKey =
+      publicKeyFromAddress(receiverDID.split(":").last);
+
+  Map<String, dynamic> x25519JwkPrivateKey =
+      await x25519JwkFromEd25519PrivateKey(privatekey);
+  Map<String, dynamic> x25519JwkReceiverPublicKey =
+      x25519JwkFromEd25519PublicKey(receiverpublicKey);
+
+  String jws = signJWS(
+    json.encode(rejectRequestVPResponseMessage.toJson()),
+    hex.encode(extendedPrivatekey),
+  );
+  List<int> sharedKey = await makeSharedKey(
+    privateKeyfromX25519Jwk(x25519JwkPrivateKey),
+    publicKeyfromX25519Jwk(x25519JwkReceiverPublicKey),
+  );
+  String jwe = encryptJWE(jws, jwkFromSharedKey(sharedKey));
+  agent.socket.emit("message", {"to": receiverSocketId, "m": jwe});
+  print("RejectRequestVPResponseMessage sent to $receiverSocketId");
+}
+
+Future<void> sendSubmitVPResponseMessage(
+  String mnemonic,
+  String did,
+  InfraDIDCommAgent agent,
+  SubmitVPMessage submitVPMessage,
+  bool isVerified,
+) async {
+  int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+  var uuid = Uuid();
+  var id = uuid.v4();
+  SubmitVPResponseMessage submitVPResponseMessage = SubmitVPResponseMessage(
+    id: id,
+    from: did,
+    to: [submitVPMessage.from],
+    createdTime: currentTime,
+    expiresTime: currentTime + 30000,
+    ack: [submitVPMessage.id],
+    status: isVerified ? "OK" : "Failed",
+  );
+
+  String? receiverSocketId = agent.peerInfo["socketId"];
+  String receiverDID = submitVPMessage.from;
+
+  List<int> extendedPrivatekey = await extendedPrivateKeyFromUri(mnemonic);
+  List<int> privatekey = await privateKeyFromUri(mnemonic);
+  List<int> receiverpublicKey =
+      publicKeyFromAddress(receiverDID.split(":").last);
+
+  Map<String, dynamic> x25519JwkPrivateKey =
+      await x25519JwkFromEd25519PrivateKey(privatekey);
+  Map<String, dynamic> x25519JwkReceiverPublicKey =
+      x25519JwkFromEd25519PublicKey(receiverpublicKey);
+
+  String jws = signJWS(
+    json.encode(submitVPMessage.toJson()),
+    hex.encode(extendedPrivatekey),
+  );
+  List<int> sharedKey = await makeSharedKey(
+    privateKeyfromX25519Jwk(x25519JwkPrivateKey),
+    publicKeyfromX25519Jwk(x25519JwkReceiverPublicKey),
+  );
+  String jwe = encryptJWE(jws, jwkFromSharedKey(sharedKey));
+  agent.socket.emit("message", {"to": receiverSocketId, "m": jwe});
+  print("SubmitVPResponseMessage sent to $receiverSocketId");
+}
+
+Future<bool> verifyVPInSubmitVPMessage(
+  String encodedVP,
+  String challenge,
+) async {
+  return true;
 }
 
 Future<String> sendDIDAuthInitMessageToReceiver(
@@ -337,4 +565,140 @@ Future<void> sendDIDAuthFailedMessage(
     agent.socket.emit("message", {"to": receiverSocketId, "m": jwe});
     print("DIDAuthFailed sent to $receiverSocketId");
   }
+}
+
+Future<void> sendSubmitVPMessage(
+  String mnemonic,
+  String did,
+  InfraDIDCommAgent agent,
+  VPRequestMessage vpRequestMessage,
+  String vp,
+) async {
+  int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+  var uuid = Uuid();
+  var id = uuid.v4();
+  SubmitVPMessage submitVPMessage = SubmitVPMessage(
+    id: id,
+    from: did,
+    to: [vpRequestMessage.from],
+    createdTime: currentTime,
+    expiresTime: currentTime + 30000,
+    ack: [vpRequestMessage.id],
+    vp: vp,
+  );
+
+  String? receiverSocketId = agent.peerInfo["socketId"];
+  String receiverDID = vpRequestMessage.from;
+
+  List<int> extendedPrivatekey = await extendedPrivateKeyFromUri(mnemonic);
+  List<int> privatekey = await privateKeyFromUri(mnemonic);
+  List<int> receiverpublicKey =
+      publicKeyFromAddress(receiverDID.split(":").last);
+
+  Map<String, dynamic> x25519JwkPrivateKey =
+      await x25519JwkFromEd25519PrivateKey(privatekey);
+  Map<String, dynamic> x25519JwkReceiverPublicKey =
+      x25519JwkFromEd25519PublicKey(receiverpublicKey);
+
+  String jws = signJWS(
+    json.encode(submitVPMessage.toJson()),
+    hex.encode(extendedPrivatekey),
+  );
+  List<int> sharedKey = await makeSharedKey(
+    privateKeyfromX25519Jwk(x25519JwkPrivateKey),
+    publicKeyfromX25519Jwk(x25519JwkReceiverPublicKey),
+  );
+  String jwe = encryptJWE(jws, jwkFromSharedKey(sharedKey));
+  agent.socket.emit("message", {"to": receiverSocketId, "m": jwe});
+  print("SubmitVPMessage sent to $receiverSocketId");
+}
+
+Future<void> sendRejectRequestVPMessage(
+  String mnemonic,
+  String did,
+  InfraDIDCommAgent agent,
+  VPRequestMessage vpRequestMessage,
+  String? reason,
+) async {
+  int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+  var uuid = Uuid();
+  var id = uuid.v4();
+  RejectRequestVPMessage rejectRequestVPMessage = RejectRequestVPMessage(
+    id: id,
+    from: did,
+    to: [vpRequestMessage.from],
+    createdTime: currentTime,
+    expiresTime: currentTime + 30000,
+    ack: [vpRequestMessage.id],
+    reason: reason,
+  );
+
+  String? receiverSocketId = agent.peerInfo["socketId"];
+  String receiverDID = vpRequestMessage.from;
+
+  List<int> extendedPrivatekey = await extendedPrivateKeyFromUri(mnemonic);
+  List<int> privatekey = await privateKeyFromUri(mnemonic);
+  List<int> receiverpublicKey =
+      publicKeyFromAddress(receiverDID.split(":").last);
+
+  Map<String, dynamic> x25519JwkPrivateKey =
+      await x25519JwkFromEd25519PrivateKey(privatekey);
+  Map<String, dynamic> x25519JwkReceiverPublicKey =
+      x25519JwkFromEd25519PublicKey(receiverpublicKey);
+
+  String jws = signJWS(
+    json.encode(rejectRequestVPMessage.toJson()),
+    hex.encode(extendedPrivatekey),
+  );
+  List<int> sharedKey = await makeSharedKey(
+    privateKeyfromX25519Jwk(x25519JwkPrivateKey),
+    publicKeyfromX25519Jwk(x25519JwkReceiverPublicKey),
+  );
+  String jwe = encryptJWE(jws, jwkFromSharedKey(sharedKey));
+  agent.socket.emit("message", {"to": receiverSocketId, "m": jwe});
+  print("RejectRequestVPMessage sent to $receiverSocketId");
+}
+
+Future<void> sendSubmitVPLaterMessage(
+  String mnemonic,
+  String did,
+  InfraDIDCommAgent agent,
+  VPRequestMessage vpRequestMessage,
+) async {
+  int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+  var uuid = Uuid();
+  var id = uuid.v4();
+  SubmitVPLaterMessage submitVPLaterMessage = SubmitVPLaterMessage(
+    id: id,
+    from: did,
+    to: [vpRequestMessage.from],
+    createdTime: currentTime,
+    expiresTime: currentTime + 30000,
+    ack: [vpRequestMessage.id],
+  );
+
+  String? receiverSocketId = agent.peerInfo["socketId"];
+  String receiverDID = vpRequestMessage.from;
+
+  List<int> extendedPrivatekey = await extendedPrivateKeyFromUri(mnemonic);
+  List<int> privatekey = await privateKeyFromUri(mnemonic);
+  List<int> receiverpublicKey =
+      publicKeyFromAddress(receiverDID.split(":").last);
+
+  Map<String, dynamic> x25519JwkPrivateKey =
+      await x25519JwkFromEd25519PrivateKey(privatekey);
+  Map<String, dynamic> x25519JwkReceiverPublicKey =
+      x25519JwkFromEd25519PublicKey(receiverpublicKey);
+
+  String jws = signJWS(
+    json.encode(submitVPLaterMessage.toJson()),
+    hex.encode(extendedPrivatekey),
+  );
+  List<int> sharedKey = await makeSharedKey(
+    privateKeyfromX25519Jwk(x25519JwkPrivateKey),
+    publicKeyfromX25519Jwk(x25519JwkReceiverPublicKey),
+  );
+  String jwe = encryptJWE(jws, jwkFromSharedKey(sharedKey));
+  agent.socket.emit("message", {"to": receiverSocketId, "m": jwe});
+  print("SubmitVPLaterMessage sent to $receiverSocketId");
 }

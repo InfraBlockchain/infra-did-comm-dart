@@ -1,7 +1,10 @@
 import "dart:async";
+import "dart:convert";
+import "package:convert/convert.dart";
 import "package:http/http.dart" as http;
 
 import "package:infra_did_comm_dart/agent/message_handler.dart";
+import "package:infra_did_comm_dart/messages/vp_request_message.dart";
 import "package:socket_io_client/socket_io_client.dart" as IO;
 import "package:uuid/uuid.dart";
 
@@ -16,6 +19,8 @@ class InfraDIDCommAgent {
 
   late IO.Socket socket;
   late Map<String, String> peerInfo = {}; // peers' info {did, socketId}
+  late String vpChallenge = "";
+  late String vpLaterCallbackEndpoint = "";
 
   bool isDIDConnected = false;
   bool isReceivedDIDAuthInit = false;
@@ -23,6 +28,12 @@ class InfraDIDCommAgent {
   late bool Function(String peerDID) didAuthCallback = (String peerDID) => true;
   late Function(String peerDID) didConnectedCallback = (String peerDID) {};
   late Function(String peerDID) didAuthFailedCallback = (String peerDID) {};
+  late Map<String, dynamic> Function(
+    List<RequestVC> requestVCs,
+    String challenge,
+  ) vpRequestCallback = (List<RequestVC> requestVCs, String challenge) {
+    return {"status": VPRequestResponseType.reject, "requestedVPs": []};
+  };
 
   Completer<String?> _socketIdCompleter = Completer();
   Future<String?> get socketId => _socketIdCompleter.future;
@@ -97,6 +108,13 @@ class InfraDIDCommAgent {
   /// [callback] - The callback function that takes a peer DID as a parameter.
   void setDIDAuthFailedCallback(Function(String peerDID) callback) {
     didAuthFailedCallback = callback;
+  }
+
+  void setVPRequestCallback(
+    Map<String, dynamic> Function(List<RequestVC> requestVCs, String challenge)
+        callback,
+  ) {
+    vpRequestCallback = callback;
   }
 
   /// Initializes the agent by setting up message handling and connecting to the server.
@@ -197,6 +215,7 @@ class InfraDIDCommAgent {
           didAuthCallback,
           didConnectedCallback,
           didAuthFailedCallback,
+          vpRequestCallback,
         ),
       },
     );
@@ -234,5 +253,36 @@ class InfraDIDCommAgent {
     peerInfo = {"did": receiverDID, "socketId": peerSocketId};
     socket.emit("message", {"to": peerSocketId, "m": message});
     print("DIDAuthInitMessage sent to $peerSocketId");
+  }
+
+  Future<void> sendVPRequestMessage(VPRequestMessage message) async {
+    vpChallenge = message.challenge;
+
+    String peerSocketId = peerInfo["socketId"]!;
+    Map<String, dynamic> jsonMessage = message.toJson();
+    String stringMessage = json.encode(jsonMessage);
+
+    String receiverAddress = message.to[0].split(":").last;
+    List<int> extendedPrivatekey = await extendedPrivateKeyFromUri(mnemonic);
+    List<int> privatekey = await privateKeyFromUri(mnemonic);
+    List<int> receiverpublicKey =
+        publicKeyFromAddress(receiverAddress.split(":").last);
+
+    Map<String, dynamic> x25519JwkPrivateKey =
+        await x25519JwkFromEd25519PrivateKey(privatekey);
+    Map<String, dynamic> x25519JwkReceiverPublicKey =
+        x25519JwkFromEd25519PublicKey(receiverpublicKey);
+
+    String jws = signJWS(
+      stringMessage,
+      hex.encode(extendedPrivatekey),
+    );
+    List<int> sharedKey = await makeSharedKey(
+      privateKeyfromX25519Jwk(x25519JwkPrivateKey),
+      publicKeyfromX25519Jwk(x25519JwkReceiverPublicKey),
+    );
+    String jwe = encryptJWE(jws, jwkFromSharedKey(sharedKey));
+    socket.emit("message", {"to": peerSocketId, "m": jwe});
+    print("VPRequestMessage sent to $peerSocketId");
   }
 }
