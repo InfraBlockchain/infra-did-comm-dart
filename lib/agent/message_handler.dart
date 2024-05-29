@@ -11,6 +11,7 @@ import "package:infra_did_comm_dart/messages/submit_vp_response_message.dart";
 import "package:infra_did_comm_dart/messages/submut_vp_later_message.dart";
 import "package:infra_did_comm_dart/messages/submut_vp_later_response_message.dart";
 import "package:infra_did_comm_dart/messages/vp_request_message.dart";
+import "package:infra_did_dart/infra_did_dart.dart";
 import "package:uuid/uuid.dart";
 
 /// Handles incoming messages and performs necessary actions based on the message type.
@@ -307,7 +308,17 @@ Future<bool> verifyVPInSubmitVPMessage(
   String encodedVP,
   String challenge,
 ) async {
-  return true;
+  Map<String, dynamic> vp = json.decode(encodedVP);
+  if (vp["proof"]["challenge"] != challenge) {
+    return false;
+  }
+
+  InfraSS58DIDResolver resolver =
+      InfraSS58DIDResolver("wss://did.stage.infrablockspace.net");
+  bool isVerified =
+      await InfraSS58VerifiablePresentation().verifyVp(vp, resolver);
+
+  return isVerified;
 }
 
 Future<String> sendDIDAuthInitMessageToReceiver(
