@@ -31,18 +31,24 @@ class VPRequestMessage {
       if (json.containsKey("type") && json["type"] != "VPReq") {
         throw Exception("Invalid type");
       }
+      List<RequestVC> vcRequirements =
+          (json["body"]["vcRequirements"] as List<dynamic>)
+              .map<RequestVC>((vc) => RequestVC.fromJson(vc))
+              .toList();
+
       return VPRequestMessage(
         id: json["id"],
         from: json["from"],
-        to: json["to"],
+        to: (json["to"] as List<dynamic>)
+            .map<String>((e) => e.toString())
+            .toList(),
         createdTime: json.containsKey("createdTime") ? json["createdTime"] : 0,
         expiresTime: json.containsKey("expiresTime") ? json["expiresTime"] : 0,
-        vcRequirements: (json["body"]["vcRequirements"] as List<dynamic>)
-            .map<RequestVC>((vc) => RequestVC.fromJson(vc))
-            .toList(),
+        vcRequirements: vcRequirements,
         challenge: json["body"]["challenge"],
       );
     } catch (e) {
+      print("Error in VPRequestMessage.fromJson: $e");
       rethrow;
     }
   }
@@ -54,6 +60,7 @@ class VPRequestMessage {
       data["id"] = id;
       data["type"] = type;
       data["from"] = from;
+      data["to"] = to;
       data["createdTime"] = createdTime;
       data["expiresTime"] = expiresTime;
       data["body"] = {
@@ -62,6 +69,7 @@ class VPRequestMessage {
       };
       return data;
     } catch (e) {
+      print("Error in VPRequestMessage.toJson: $e");
       rethrow;
     }
   }
@@ -85,6 +93,7 @@ class RequestVC {
             : null,
       );
     } catch (e) {
+      print("Error in RequestVC.fromJson: $e");
       rethrow;
     }
   }
@@ -99,6 +108,7 @@ class RequestVC {
       }
       return data;
     } catch (e) {
+      print("Error in RequestVC.toJson: $e");
       rethrow;
     }
   }
@@ -123,6 +133,7 @@ class RequestVCQuery {
             : null,
       );
     } catch (e) {
+      print("Error in RequestVCQuery.fromJson: $e");
       rethrow;
     }
   }
@@ -135,6 +146,7 @@ class RequestVCQuery {
       data["filterConditions"] = filterConditions;
       return data;
     } catch (e) {
+      print("Error in RequestVCQuery.toJson: $e");
       rethrow;
     }
   }

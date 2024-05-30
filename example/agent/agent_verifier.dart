@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:infra_did_comm_dart/infra_did_comm_dart.dart";
 
 bool didAuthCallback(String peerDID) {
@@ -40,7 +42,7 @@ initiatedByHolderScenario() async {
 
   String? socketId = await agent.socketId;
   if (socketId != null) {
-    String holderSocketId = "k-SAypSD7ZRlj_wcAC7Y";
+    String holderSocketId = "M_iAfCS_9oUpWRX0ADBb";
     final minimalCompactJson = {
       "from": "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
       "body": {
@@ -56,6 +58,13 @@ initiatedByHolderScenario() async {
     await agent.sendDIDAuthInitMessage(encoded);
   } else {
     print("Socket ID is null");
+  }
+
+  await waitForDIDConnected(agent);
+
+  if (agent.isDIDConnected) {
+    print("DID is connected");
+    agent.sendVPRequestMessage([], "challenge");
   }
 }
 
@@ -93,5 +102,11 @@ initiatedByVerifierScenario() async {
     print("Verifier make encoded request message: $encoded");
   } else {
     print("Socket ID is null");
+  }
+}
+
+Future<void> waitForDIDConnected(InfraDIDCommAgent agent) async {
+  while (!agent.isDIDConnected) {
+    await Future.delayed(Duration(seconds: 1));
   }
 }

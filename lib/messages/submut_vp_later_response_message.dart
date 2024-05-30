@@ -28,13 +28,15 @@ class SubmitVPLaterResponseMessage {
 
   factory SubmitVPLaterResponseMessage.fromJson(Map<String, dynamic> json) {
     try {
-      if (json.containsKey("type") && json["type"] != "SubmitVPLaterRes") {
+      if (json.containsKey("type") && json["type"] != "VPSubmitLaterRes") {
         throw Exception("Invalid type");
       }
       return SubmitVPLaterResponseMessage(
         id: json["id"],
         from: json["from"],
-        to: json["to"],
+        to: (json["to"] as List<dynamic>)
+            .map<String>((e) => e.toString())
+            .toList(),
         ack: json.containsKey("ack") ? List<String>.from(json["ack"]) : [],
         createdTime: json.containsKey("createdTime") ? json["createdTime"] : 0,
         expiresTime: json.containsKey("expiresTime") ? json["expiresTime"] : 0,

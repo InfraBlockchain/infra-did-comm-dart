@@ -84,6 +84,7 @@ Future<void> messageHandler(
         String jwsFromJwe = await decryptJWE(jwe, jwkFromSharedKey(sharedKey));
         Map<String, dynamic> jwsPayload =
             verifyJWS(jwsFromJwe, hex.encode(fromPublicKey));
+
         if (jwsPayload["type"] == "DIDAuth") {
           // If Success, Send DID Connected Message
           if (didAuthCallback != null) didAuthCallback(fromDID);
@@ -116,15 +117,12 @@ Future<void> messageHandler(
         if (jwsPayload["type"] == "VPReq") {
           print("VPRequestMessage Message Received");
           if (vpRequestCallback != null) {
-            print(jwsPayload["body"]["challenge"]);
-            print(jwsPayload["body"]["vcRequirements"]);
             Map<String, dynamic> result = vpRequestCallback(
               (jwsPayload["body"]["vcRequirements"] as List<dynamic>)
                   .map<RequestVC>((vc) => RequestVC.fromJson(vc))
                   .toList(),
               jwsPayload["body"]["challenge"],
             );
-            print(result);
             var status = result["status"] as String;
             if (status == VPRequestResponseType.submit.name) {
               var vp = result["vp"] as String;
@@ -136,7 +134,10 @@ Future<void> messageHandler(
                 vp,
               );
             } else if (status == VPRequestResponseType.reject.name) {
-              var reason = result["reason"] as String?;
+              var reason = result.containsKey("reason")
+                  ? result["reason"] as String
+                  : "Rejected";
+
               await sendRejectRequestVPMessage(
                 mnemonic,
                 did,
@@ -197,9 +198,10 @@ Future<void> messageHandler(
       }
     }
   } catch (e) {
-    sendDIDAuthFailedMessage(mnemonic, did, agent);
-    agent.disconnect();
-    throw Exception("Error in message handling: $e");
+    // sendDIDAuthFailedMessage(mnemonic, did, agent);
+    // agent.disconnect();
+    // throw Exception("Error in message handling: $e");
+    print(e);
   }
 }
 
@@ -309,18 +311,24 @@ Future<bool> verifyVP(
   String encodedVP,
   String challenge,
 ) async {
-  String jsonStringVP = utf8.decode(base64Url.decode(encodedVP));
-  Map<String, dynamic> vp = json.decode(jsonStringVP);
-  if (vp["proof"]["challenge"] != challenge) {
+  try {
+    String jsonStringVP = utf8.decode(base64Url.decode(encodedVP));
+    Map<String, dynamic> vp = json.decode(jsonStringVP);
+
+    if (vp["proofOptions"]["challenge"] != challenge) {
+      return false;
+    }
+
+    InfraSS58DIDResolver resolver =
+        InfraSS58DIDResolver("wss://did.stage.infrablockspace.net");
+    bool isVerified =
+        await InfraSS58VerifiablePresentation().verifyVp(vp, resolver);
+
+    return isVerified;
+  } catch (e) {
+    print(e);
     return false;
   }
-
-  InfraSS58DIDResolver resolver =
-      InfraSS58DIDResolver("wss://did.stage.infrablockspace.net");
-  bool isVerified =
-      await InfraSS58VerifiablePresentation().verifyVp(vp, resolver);
-
-  return isVerified;
 }
 
 Future<String> sendDIDAuthInitMessageToReceiver(
@@ -497,11 +505,12 @@ Future<void> sendRejectRequestVPMessage(
   String did,
   InfraDIDCommAgent agent,
   VPRequestMessage vpRequestMessage,
-  String? reason,
+  String reason,
 ) async {
   int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
   var uuid = Uuid();
   var id = uuid.v4();
+
   RejectRequestVPMessage rejectRequestVPMessage = RejectRequestVPMessage(
     id: id,
     from: did,
@@ -509,11 +518,10 @@ Future<void> sendRejectRequestVPMessage(
     createdTime: currentTime,
     expiresTime: currentTime + 30000,
     ack: [vpRequestMessage.id],
-    reason: reason ?? "Rejected",
+    reason: reason,
   );
 
   String? receiverSocketId = agent.peerInfo["socketId"];
-
   String jwe = await makeJWEFromMessage(
     mnemonic,
     agent.peerInfo["did"]!,
