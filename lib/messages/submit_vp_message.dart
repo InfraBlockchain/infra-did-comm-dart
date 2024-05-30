@@ -36,11 +36,9 @@ class SubmitVPMessage {
         from: json["from"],
         to: json["to"],
         ack: json.containsKey("ack") ? List<String>.from(json["ack"]) : [],
-        createdTime:
-            json.containsKey("created_time") ? json["created_time"] : 0,
-        expiresTime:
-            json.containsKey("expires_time") ? json["expires_time"] : 0,
-        vp: json["body"]["VP"],
+        createdTime: json.containsKey("createdTime") ? json["createdTime"] : 0,
+        expiresTime: json.containsKey("expiresTime") ? json["expiresTime"] : 0,
+        vp: json["body"]["vp"],
       );
     } catch (e) {
       rethrow;
@@ -56,9 +54,9 @@ class SubmitVPMessage {
       data["from"] = from;
       data["to"] = to;
       data["ack"] = ack;
-      data["created_time"] = createdTime;
-      data["expires_time"] = expiresTime;
-      data["body"] = {"VP": vp};
+      data["createdTime"] = createdTime;
+      data["expiresTime"] = expiresTime;
+      data["body"] = {"vp": vp};
       return data;
     } catch (e) {
       rethrow;

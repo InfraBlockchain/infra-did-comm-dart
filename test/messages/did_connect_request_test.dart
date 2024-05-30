@@ -35,8 +35,8 @@ void main() {
       "type": "DIDConnectReq",
       "from":
           "did:infra:01:PUB_K1_8KeFXUKBR9kctm3eafs2tgqK3XxcqsnHtRp2kjSdfDFSn3x4bK",
-      "created_time": 1662441420,
-      "expires_time": 1662441435,
+      "createdTime": 1662441420,
+      "expiresTime": 1662441435,
       "body": {
         "initiator": {
           "type": "HOLDER",
@@ -73,8 +73,8 @@ void main() {
       "type": "DIDConnectReq",
       "from":
           "did:infra:01:PUB_K1_8KeFXUKBR9kctm3eafs2tgqK3XxcqsnHtRp2kjSdfDFSn3x4bK",
-      "created_time": 1662441420,
-      "expires_time": 1662441435,
+      "createdTime": 1662441420,
+      "expiresTime": 1662441435,
       "body": {
         "i": {
           "se": "https://wss.infradid.io",
@@ -133,8 +133,8 @@ void main() {
       "type": "DIDConnectReq",
       "from":
           "did:infra:01:PUB_K1_8KeFXUKBR9kctm3eafs2tgqK3XxcqsnHtRp2kjSdfDFSn3x4bK",
-      "created_time": 1662441420,
-      "expires_time": 1662441435,
+      "createdTime": 1662441420,
+      "expiresTime": 1662441435,
       "body": {
         "initiator": {
           "type": "HOLDER",
@@ -157,8 +157,8 @@ void main() {
       "type": "DIDConnectReq",
       "from":
           "did:infra:01:PUB_K1_8KeFXUKBR9kctm3eafs2tgqK3XxcqsnHtRp2kjSdfDFSn3x4bK",
-      "created_time": 1662441420,
-      "expires_time": 1662441435,
+      "createdTime": 1662441420,
+      "expiresTime": 1662441435,
       "body": {
         "initiator": {
           "type": "HOLDER",
@@ -177,8 +177,8 @@ void main() {
       "type": "DIDConnectReq",
       "from":
           "did:infra:01:PUB_K1_8KeFXUKBR9kctm3eafs2tgqK3XxcqsnHtRp2kjSdfDFSn3x4bK",
-      "created_time": 1662441420,
-      "expires_time": 1662441435,
+      "createdTime": 1662441420,
+      "expiresTime": 1662441435,
       "body": {
         "i": {
           "se": "https://wss.infradid.io",
@@ -197,8 +197,8 @@ void main() {
       "type": "DIDConnectReq",
       "from":
           "did:infra:01:PUB_K1_8KeFXUKBR9kctm3eafs2tgqK3XxcqsnHtRp2kjSdfDFSn3x4bK",
-      "created_time": 1662441420,
-      "expires_time": 1662441435,
+      "createdTime": 1662441420,
+      "expiresTime": 1662441435,
       "body": {
         "initiator": {
           "type": "HOLDER",
@@ -229,8 +229,8 @@ void main() {
       "type": "DIDConnectReq",
       "from":
           "did:infra:01:PUB_K1_8KeFXUKBR9kctm3eafs2tgqK3XxcqsnHtRp2kjSdfDFSn3x4bK",
-      "created_time": 1662441420,
-      "expires_time": 1662441435,
+      "createdTime": 1662441420,
+      "expiresTime": 1662441435,
       "body": {
         "initiator": {
           "type": "HOLDER",
@@ -265,8 +265,8 @@ void main() {
       "type": "DIDConnectReq",
       "from":
           "did:infra:01:PUB_K1_8KeFXUKBR9kctm3eafs2tgqK3XxcqsnHtRp2kjSdfDFSn3x4bK",
-      "created_time": 1662441420,
-      "expires_time": 1662441435,
+      "createdTime": 1662441420,
+      "expiresTime": 1662441435,
       "body": {
         "initiator": {
           "type": "HOLDER",
@@ -289,8 +289,8 @@ void main() {
       "type": "DIDConnectReq",
       "from":
           "did:infra:01:PUB_K1_8KeFXUKBR9kctm3eafs2tgqK3XxcqsnHtRp2kjSdfDFSn3x4bK",
-      "created_time": 1662441420,
-      "expires_time": 1662441435,
+      "createdTime": 1662441420,
+      "expiresTime": 1662441435,
       "body": {
         "i": {
           "se": "https://wss.infradid.io",

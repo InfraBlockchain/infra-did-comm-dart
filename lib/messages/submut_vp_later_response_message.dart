@@ -36,10 +36,8 @@ class SubmitVPLaterResponseMessage {
         from: json["from"],
         to: json["to"],
         ack: json.containsKey("ack") ? List<String>.from(json["ack"]) : [],
-        createdTime:
-            json.containsKey("created_time") ? json["created_time"] : 0,
-        expiresTime:
-            json.containsKey("expires_time") ? json["expires_time"] : 0,
+        createdTime: json.containsKey("createdTime") ? json["createdTime"] : 0,
+        expiresTime: json.containsKey("expiresTime") ? json["expiresTime"] : 0,
         callbackUrl: json["body"]["callback_url"],
       );
     } catch (e) {
@@ -56,8 +54,8 @@ class SubmitVPLaterResponseMessage {
       data["from"] = from;
       data["to"] = to;
       data["ack"] = ack;
-      data["created_time"] = createdTime;
-      data["expires_time"] = expiresTime;
+      data["createdTime"] = createdTime;
+      data["expiresTime"] = expiresTime;
       data["body"] = {"callbackUrl": callbackUrl};
       return data;
     } catch (e) {

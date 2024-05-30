@@ -260,7 +260,7 @@ class InfraDIDCommAgent {
   }
 
   Future<void> sendVPRequestMessage(
-    List<RequestVC> vcs,
+    List<RequestVC> vcRequirements,
     String challenge,
   ) async {
     try {
@@ -276,7 +276,7 @@ class InfraDIDCommAgent {
         to: [receiverDID],
         createdTime: currentTime,
         expiresTime: currentTime + 30000,
-        vcs: vcs,
+        vcRequirements: vcRequirements,
         challenge: challenge,
       );
 

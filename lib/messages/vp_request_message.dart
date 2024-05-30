@@ -5,7 +5,7 @@ class VPRequestMessage {
   List<String> to;
   int? createdTime;
   int? expiresTime;
-  List<RequestVC> vcs;
+  List<RequestVC> vcRequirements;
   String challenge;
 
   VPRequestMessage({
@@ -14,7 +14,7 @@ class VPRequestMessage {
     required this.to,
     this.createdTime,
     this.expiresTime,
-    required this.vcs,
+    required this.vcRequirements,
     required this.challenge,
   }) {
     id = id;
@@ -22,7 +22,7 @@ class VPRequestMessage {
     to = to;
     createdTime = createdTime;
     expiresTime = expiresTime;
-    vcs = vcs;
+    vcRequirements = vcRequirements;
     challenge = challenge;
   }
 
@@ -35,11 +35,9 @@ class VPRequestMessage {
         id: json["id"],
         from: json["from"],
         to: json["to"],
-        createdTime:
-            json.containsKey("created_time") ? json["created_time"] : 0,
-        expiresTime:
-            json.containsKey("expires_time") ? json["expires_time"] : 0,
-        vcs: (json["body"]["VCs"] as List<dynamic>)
+        createdTime: json.containsKey("createdTime") ? json["createdTime"] : 0,
+        expiresTime: json.containsKey("expiresTime") ? json["expiresTime"] : 0,
+        vcRequirements: (json["body"]["vcRequirements"] as List<dynamic>)
             .map<RequestVC>((vc) => RequestVC.fromJson(vc))
             .toList(),
         challenge: json["body"]["challenge"],
@@ -56,10 +54,10 @@ class VPRequestMessage {
       data["id"] = id;
       data["type"] = type;
       data["from"] = from;
-      data["created_time"] = createdTime;
-      data["expires_time"] = expiresTime;
+      data["createdTime"] = createdTime;
+      data["expiresTime"] = expiresTime;
       data["body"] = {
-        "VCs": vcs.map((vc) => vc.toJson()).toList(),
+        "vcRequirements": vcRequirements.map((vc) => vc.toJson()).toList(),
         "challenge": challenge
       };
       return data;
@@ -81,7 +79,7 @@ class RequestVC {
   factory RequestVC.fromJson(Map<String, dynamic> json) {
     try {
       return RequestVC(
-        vcType: json["vc-type"],
+        vcType: json["vcType"],
         query: json.containsKey("query")
             ? RequestVCQuery.fromJson(json["query"])
             : null,
@@ -95,7 +93,7 @@ class RequestVC {
   Map<String, dynamic> toJson() {
     try {
       final Map<String, dynamic> data = {};
-      data["vc-type"] = vcType;
+      data["vcType"] = vcType;
       if (query != null) {
         data["query"] = query!.toJson();
       }
@@ -118,11 +116,10 @@ class RequestVCQuery {
   factory RequestVCQuery.fromJson(Map<String, dynamic> json) {
     try {
       return RequestVCQuery(
-        selectedClaims: json.containsKey("selected-claims")
-            ? json["selected-claims"]
-            : null,
-        filterConditions: json.containsKey("filter-conditions")
-            ? json["filter-conditions"]
+        selectedClaims:
+            json.containsKey("selectedClaims") ? json["selectedClaims"] : null,
+        filterConditions: json.containsKey("filterConditions")
+            ? json["filterConditions"]
             : null,
       );
     } catch (e) {
@@ -134,8 +131,8 @@ class RequestVCQuery {
   Map<String, dynamic> toJson() {
     try {
       final Map<String, dynamic> data = {};
-      data["selected-claims"] = selectedClaims;
-      data["filter-conditions"] = filterConditions;
+      data["selectedClaims"] = selectedClaims;
+      data["filterConditions"] = filterConditions;
       return data;
     } catch (e) {
       rethrow;

@@ -117,9 +117,9 @@ Future<void> messageHandler(
           print("VPRequestMessage Message Received");
           if (vpRequestCallback != null) {
             print(jwsPayload["body"]["challenge"]);
-            print(jwsPayload["body"]["VCs"]);
+            print(jwsPayload["body"]["vcRequirements"]);
             Map<String, dynamic> result = vpRequestCallback(
-              (jwsPayload["body"]["VCs"] as List<dynamic>)
+              (jwsPayload["body"]["vcRequirements"] as List<dynamic>)
                   .map<RequestVC>((vc) => RequestVC.fromJson(vc))
                   .toList(),
               jwsPayload["body"]["challenge"],
