@@ -15,10 +15,10 @@ void didAuthFailedCallback(String peerDID) {
 
 main() async {
   // If you want to run the initiatedByHolderScenario, uncomment the line below
-  // initiatedByHolderScenario();
+  initiatedByHolderScenario();
 
   // If you want to run the initiatedByVerifierScenario, uncomment the line below
-  initiatedByVerifierScenario();
+  // initiatedByVerifierScenario();
 }
 
 initiatedByHolderScenario() async {

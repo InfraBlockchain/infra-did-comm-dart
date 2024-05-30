@@ -15,10 +15,10 @@ void didAuthFailedCallback(String peerDID) {
 
 main() async {
   // If you want to run the initiatedByHolderScenario, uncomment the line below
-  // initiatedByHolderScenario();
+  initiatedByHolderScenario();
 
   // If you want to run the initiatedByVerifierScenario, uncomment the line below
-  initiatedByVerifierScenario();
+  // initiatedByVerifierScenario();
 }
 
 initiatedByHolderScenario() async {
@@ -40,7 +40,7 @@ initiatedByHolderScenario() async {
 
   String? socketId = await agent.socketId;
   if (socketId != null) {
-    String holderSocketId = "Sihuz9kg2cWz4gcdAAXz";
+    String holderSocketId = "k-SAypSD7ZRlj_wcAC7Y";
     final minimalCompactJson = {
       "from": "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
       "body": {

@@ -1,6 +1,6 @@
 class RejectRequestVPResponseMessage {
   String id;
-  String type = "RejectReqVPRes";
+  String type = "VPReqRejectRes";
   String from;
   List<String> to;
   List<String>? ack;

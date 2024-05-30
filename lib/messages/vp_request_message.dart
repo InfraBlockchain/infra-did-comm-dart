@@ -81,7 +81,7 @@ class RequestVC {
   factory RequestVC.fromJson(Map<String, dynamic> json) {
     try {
       return RequestVC(
-        vcType: json["vcType"],
+        vcType: json["vc-type"],
         query: json.containsKey("query")
             ? RequestVCQuery.fromJson(json["query"])
             : null,
@@ -96,7 +96,9 @@ class RequestVC {
     try {
       final Map<String, dynamic> data = {};
       data["vc-type"] = vcType;
-      data["query"] = query?.toJson();
+      if (query != null) {
+        data["query"] = query!.toJson();
+      }
       return data;
     } catch (e) {
       rethrow;

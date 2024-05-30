@@ -1,6 +1,6 @@
 class SubmitVPLaterResponseMessage {
   String id;
-  String type = "SubmitVPLaterRes";
+  String type = "VPSubmitLaterRes";
   String from;
   List<String> to;
   List<String>? ack;

@@ -1,6 +1,6 @@
 class SubmitVPLaterMessage {
   String id;
-  String type = "SubmitVPLater";
+  String type = "VPSubmitLater";
   String from;
   List<String> to;
   List<String>? ack;

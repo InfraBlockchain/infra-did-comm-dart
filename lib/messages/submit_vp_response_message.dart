@@ -1,6 +1,6 @@
 class SubmitVPResponseMessage {
   String id;
-  String type = "SubmitVPRes";
+  String type = "VPSubmitRes";
   String from;
   List<String> to;
   List<String>? ack;

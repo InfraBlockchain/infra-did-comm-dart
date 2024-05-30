@@ -45,7 +45,6 @@ class _MyHomePageState extends State<MyHomePage> {
     mnemonic: mnemonic,
     role: "HOLDER",
   );
-
   late QRViewController controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   DateTime? lastScan;
@@ -79,10 +78,20 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> connectWebsocket() async {
     agent.connect();
+    agent.setVPRequestCallback((requestVCs, challenge) => {"status": "reject"});
   }
 
   void disconnectWebsocket() {
     agent.disconnect();
+  }
+
+  Future<void> sendVPRequestMessage() async {
+    if (!agent.isDIDConnected) {
+      print("DID is not connected");
+      return;
+    }
+    List<RequestVC> requestVCs = [RequestVC(vcType: "test")];
+    agent.sendVPRequestMessage(requestVCs, "challenge");
   }
 
   @override
@@ -112,6 +121,9 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
                 onPressed: disconnectWebsocket,
                 child: const Text("wsDisconnect")),
+            ElevatedButton(
+                onPressed: sendVPRequestMessage,
+                child: const Text("Send VP Request Message")),
             ElevatedButton(
               onPressed: () {
                 showDialog(
@@ -184,7 +196,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   padding: const EdgeInsets.all(16.0),
                   child: FloatingActionButton(
                     onPressed: () {
-                      agent.disconnect();
                       Navigator.pop(context); // 뒤로가기 버튼
                     },
                     tooltip: '뒤로가기',
@@ -279,7 +290,6 @@ class _QRCodeModalState extends State<QRCodeModal> {
         ),
         ElevatedButton(
           onPressed: () {
-            widget.agent.disconnect();
             Navigator.of(context).pop();
           },
           child: const Text("닫기"),

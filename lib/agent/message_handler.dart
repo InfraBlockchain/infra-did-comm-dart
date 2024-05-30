@@ -4,13 +4,6 @@ import "dart:convert";
 
 import "package:convert/convert.dart";
 import "package:infra_did_comm_dart/infra_did_comm_dart.dart";
-import "package:infra_did_comm_dart/messages/reject_request_vp_message.dart";
-import "package:infra_did_comm_dart/messages/reject_request_vp_response_message.dart";
-import "package:infra_did_comm_dart/messages/submit_vp_message.dart";
-import "package:infra_did_comm_dart/messages/submit_vp_response_message.dart";
-import "package:infra_did_comm_dart/messages/submut_vp_later_message.dart";
-import "package:infra_did_comm_dart/messages/submut_vp_later_response_message.dart";
-import "package:infra_did_comm_dart/messages/vp_request_message.dart";
 import "package:infra_did_dart/infra_did_dart.dart";
 import "package:uuid/uuid.dart";
 
@@ -46,159 +39,167 @@ Future<void> messageHandler(
   try {
     Map<String, dynamic> header = extractJWEHeader(jwe);
     String alg = header["alg"];
-    if (!agent.isDIDConnected) {
-      if (alg == "ECDH-ES") {
-        // Handle DIDAuthInit Message
-        Map<String, dynamic> epk = header["epk"];
-        List<int> privatekey = await privateKeyFromUri(mnemonic);
-        Map<String, dynamic> x25519JwkPrivateKey =
-            await x25519JwkFromEd25519PrivateKey(privatekey);
+    if (alg == "ECDH-ES") {
+      // Handle DIDAuthInit Message
+      Map<String, dynamic> epk = header["epk"];
+      List<int> privatekey = await privateKeyFromUri(mnemonic);
+      Map<String, dynamic> x25519JwkPrivateKey =
+          await x25519JwkFromEd25519PrivateKey(privatekey);
+      List<int> sharedKey = await makeSharedKey(
+        privateKeyfromX25519Jwk(x25519JwkPrivateKey),
+        publicKeyfromX25519Jwk(epk),
+      );
+      String jwsFromJwe = await decryptJWE(jwe, jwkFromSharedKey(sharedKey));
+      var payload = decodeJWS(jwsFromJwe);
+      String fromDID = payload["from"];
+      String fromAddress = fromDID.split(":").last;
+      List<int> fromPublicKey = publicKeyFromAddress(fromAddress);
+      Map<String, dynamic> jwsPayload =
+          verifyJWS(jwsFromJwe, hex.encode(fromPublicKey));
+      agent.peerInfo = {
+        "did": jwsPayload["from"],
+        "socketId": jwsPayload["body"]["socketId"],
+      };
+      agent.isReceivedDIDAuthInit = true;
+      // If Success, Send DID Auth Message
+      if (didAuthCallback != null) didAuthCallback(fromDID);
+      sendDIDAuthMessage(mnemonic, jwsPayload, agent);
+    }
+    if (alg == "dir") {
+      // Handle DIDAuth && DIDConnected Message
+      List<int> privatekey = await privateKeyFromUri(mnemonic);
+      Map<String, dynamic> x25519JwkPrivateKey =
+          await x25519JwkFromEd25519PrivateKey(privatekey);
+      if (agent.peerInfo.containsKey("did")) {
+        String? fromDID = agent.peerInfo["did"];
+        String fromAddress = fromDID!.split(":").last;
+        List<int> fromPublicKey = publicKeyFromAddress(fromAddress);
+        Map<String, dynamic> x25519JwkPublicKey =
+            x25519JwkFromEd25519PublicKey(fromPublicKey);
+
         List<int> sharedKey = await makeSharedKey(
           privateKeyfromX25519Jwk(x25519JwkPrivateKey),
-          publicKeyfromX25519Jwk(epk),
+          publicKeyfromX25519Jwk(x25519JwkPublicKey),
         );
         String jwsFromJwe = await decryptJWE(jwe, jwkFromSharedKey(sharedKey));
-        var payload = decodeJWS(jwsFromJwe);
-        String fromDID = payload["from"];
-        String fromAddress = fromDID.split(":").last;
-        List<int> fromPublicKey = publicKeyFromAddress(fromAddress);
         Map<String, dynamic> jwsPayload =
             verifyJWS(jwsFromJwe, hex.encode(fromPublicKey));
-        agent.peerInfo = {
-          "did": jwsPayload["from"],
-          "socketId": jwsPayload["body"]["socketId"],
-        };
-        agent.isReceivedDIDAuthInit = true;
-        // If Success, Send DID Auth Message
-        if (didAuthCallback != null) didAuthCallback(fromDID);
-        sendDIDAuthMessage(mnemonic, jwsPayload, agent);
-      }
-      if (alg == "dir") {
-        // Handle DIDAuth && DIDConnected Message
-        List<int> privatekey = await privateKeyFromUri(mnemonic);
-        Map<String, dynamic> x25519JwkPrivateKey =
-            await x25519JwkFromEd25519PrivateKey(privatekey);
-        if (agent.peerInfo.containsKey("did")) {
-          String? fromDID = agent.peerInfo["did"];
-          String fromAddress = fromDID!.split(":").last;
-          List<int> fromPublicKey = publicKeyFromAddress(fromAddress);
-          Map<String, dynamic> x25519JwkPublicKey =
-              x25519JwkFromEd25519PublicKey(fromPublicKey);
-
-          List<int> sharedKey = await makeSharedKey(
-            privateKeyfromX25519Jwk(x25519JwkPrivateKey),
-            publicKeyfromX25519Jwk(x25519JwkPublicKey),
+        if (jwsPayload["type"] == "DIDAuth") {
+          // If Success, Send DID Connected Message
+          if (didAuthCallback != null) didAuthCallback(fromDID);
+          sendDIDConnectedMessage(
+            mnemonic,
+            jwsPayload,
+            agent,
           );
-          String jwsFromJwe =
-              await decryptJWE(jwe, jwkFromSharedKey(sharedKey));
-          Map<String, dynamic> jwsPayload =
-              verifyJWS(jwsFromJwe, hex.encode(fromPublicKey));
-          if (jwsPayload["type"] == "DIDAuth") {
-            // If Success, Send DID Connected Message
-            if (didAuthCallback != null) didAuthCallback(fromDID);
+          if (agent.role == "VERIFIER") {
+            agent.isDIDConnected = true;
+          }
+        }
+        if (jwsPayload["type"] == "DIDConnected") {
+          print("DIDConnected Message Received");
+          if (didConnectedCallback != null) didConnectedCallback(fromDID);
+          agent.isDIDConnected = true;
+          if (agent.role == "VERIFIER") {
             sendDIDConnectedMessage(
               mnemonic,
               jwsPayload,
               agent,
             );
           }
-          if (jwsPayload["type"] == "DIDConnected") {
-            print("DIDConnected Message Received");
-            if (didConnectedCallback != null) didConnectedCallback(fromDID);
-            agent.isDIDConnected = true;
-            if (agent.role == "VERIFIER") {
-              sendDIDConnectedMessage(
+        }
+        if (jwsPayload["type"] == "DIDAuthFailed") {
+          if (didAuthFailedCallback != null) didAuthFailedCallback(fromDID);
+          print("DIDAuthFailed Message Received");
+          agent.disconnect();
+        }
+        if (jwsPayload["type"] == "VPReq") {
+          print("VPRequestMessage Message Received");
+          if (vpRequestCallback != null) {
+            print(jwsPayload["body"]["challenge"]);
+            print(jwsPayload["body"]["VCs"]);
+            Map<String, dynamic> result = vpRequestCallback(
+              (jwsPayload["body"]["VCs"] as List<dynamic>)
+                  .map<RequestVC>((vc) => RequestVC.fromJson(vc))
+                  .toList(),
+              jwsPayload["body"]["challenge"],
+            );
+            print(result);
+            var status = result["status"] as String;
+            if (status == VPRequestResponseType.submit.name) {
+              var vp = result["vp"] as String;
+              await sendSubmitVPMessage(
                 mnemonic,
-                jwsPayload,
+                did,
                 agent,
+                VPRequestMessage.fromJson(jwsPayload),
+                vp,
+              );
+            } else if (status == VPRequestResponseType.reject.name) {
+              var reason = result["reason"] as String?;
+              await sendRejectRequestVPMessage(
+                mnemonic,
+                did,
+                agent,
+                VPRequestMessage.fromJson(jwsPayload),
+                reason,
+              );
+            } else if (status == VPRequestResponseType.submitLater.name) {
+              await sendSubmitVPLaterMessage(
+                mnemonic,
+                did,
+                agent,
+                VPRequestMessage.fromJson(jwsPayload),
               );
             }
           }
-          if (jwsPayload["type"] == "DIDAuthFailed") {
-            if (didAuthFailedCallback != null) didAuthFailedCallback(fromDID);
-            print("DIDAuthFailed Message Received");
-            agent.disconnect();
-          }
-          if (jwsPayload["type"] == "VPReq") {
-            if (vpRequestCallback != null) {
-              Map<String, dynamic> result = vpRequestCallback(
-                (jwsPayload["body"]["VCs"] as List<dynamic>)
-                    .map<RequestVC>((vc) => RequestVC.fromJson(vc))
-                    .toList(),
-                jwsPayload["body"]["challenge"],
-              );
-              var status = result["status"] as String;
-              if (status == VPRequestResponseType.submitNow.name) {
-                var vp = result["vp"] as String;
-                await sendSubmitVPMessage(
-                  mnemonic,
-                  did,
-                  agent,
-                  VPRequestMessage.fromJson(jwsPayload),
-                  vp,
-                );
-              } else if (status == VPRequestResponseType.reject.name) {
-                var reason = result["reason"] as String?;
-                await sendRejectRequestVPMessage(mnemonic, did, agent,
-                    VPRequestMessage.fromJson(jwsPayload), reason);
-              } else if (status == VPRequestResponseType.submitLater.name) {
-                await sendSubmitVPLaterMessage(
-                  mnemonic,
-                  did,
-                  agent,
-                  VPRequestMessage.fromJson(jwsPayload),
-                );
-              }
-            }
-          }
-          if (jwsPayload["type"] == "SubmitVP") {
-            bool isVerified = await verifyVP(
-              jwsPayload["body"]["vp"],
-              agent.vpChallenge,
-            );
+        }
+        if (jwsPayload["type"] == "VPSubmit") {
+          bool isVerified = await verifyVP(
+            jwsPayload["body"]["vp"],
+            agent.vpChallenge,
+          );
 
-            await sendSubmitVPResponseMessage(
-              mnemonic,
-              did,
-              agent,
-              SubmitVPMessage.fromJson(jwsPayload),
-              isVerified,
-            );
-          }
-          if (jwsPayload["type"] == "SubmitVPRes") {
-            print("SubmitVPRes Message Received");
-          }
-          if (jwsPayload["type"] == "RejectReqVP") {
-            await sendRejectRequestVPResponseMessage(
-              mnemonic,
-              did,
-              agent,
-              RejectRequestVPMessage.fromJson(jwsPayload),
-            );
-          }
-          if (jwsPayload["type"] == "RejectReqVPRes") {
-            print("RejectReqVPRes Message Received");
-          }
-          if (jwsPayload["type"] == "SubmitVPLater") {
-            await sendSubmitVPLaterResponseMessage(
-              mnemonic,
-              did,
-              agent,
-              SubmitVPLaterMessage.fromJson(jwsPayload),
-              agent.vpLaterCallbackEndpoint,
-            );
-          }
-          if (jwsPayload["type"] == "SubmitVPLaterRes") {
-            print("SubmitVPLaterRes Message Received");
-          }
+          await sendSubmitVPResponseMessage(
+            mnemonic,
+            did,
+            agent,
+            SubmitVPMessage.fromJson(jwsPayload),
+            isVerified,
+          );
+        }
+        if (jwsPayload["type"] == "VPSubmitRes") {
+          print("SubmitVPRes Message Received");
+        }
+        if (jwsPayload["type"] == "VPReqReject") {
+          await sendRejectRequestVPResponseMessage(
+            mnemonic,
+            did,
+            agent,
+            RejectRequestVPMessage.fromJson(jwsPayload),
+          );
+        }
+        if (jwsPayload["type"] == "VPReqRejectRes") {
+          print("RejectReqVPRes Message Received");
+        }
+        if (jwsPayload["type"] == "VPSubmitLater") {
+          await sendSubmitVPLaterResponseMessage(
+            mnemonic,
+            did,
+            agent,
+            SubmitVPLaterMessage.fromJson(jwsPayload),
+            agent.vpLaterCallbackEndpoint,
+          );
+        }
+        if (jwsPayload["type"] == "VPSubmitLaterRes") {
+          print("SubmitVPLaterRes Message Received");
         }
       }
     }
   } catch (e) {
-    print(e);
-    agent.peerInfo.clear();
     sendDIDAuthFailedMessage(mnemonic, did, agent);
-    agent.socket.disconnect();
+    agent.disconnect();
+    throw Exception("Error in message handling: $e");
   }
 }
 
@@ -508,7 +509,7 @@ Future<void> sendRejectRequestVPMessage(
     createdTime: currentTime,
     expiresTime: currentTime + 30000,
     ack: [vpRequestMessage.id],
-    reason: reason,
+    reason: reason ?? "Rejected",
   );
 
   String? receiverSocketId = agent.peerInfo["socketId"];

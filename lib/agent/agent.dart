@@ -32,7 +32,7 @@ class InfraDIDCommAgent {
     List<RequestVC> requestVCs,
     String challenge,
   ) vpRequestCallback = (List<RequestVC> requestVCs, String challenge) {
-    return {"status": VPRequestResponseType.reject, "requestedVPs": []};
+    return {"status": "reject"};
   };
 
   Completer<String?> _socketIdCompleter = Completer();
@@ -263,31 +263,35 @@ class InfraDIDCommAgent {
     List<RequestVC> vcs,
     String challenge,
   ) async {
-    vpChallenge = challenge;
+    try {
+      vpChallenge = challenge;
 
-    int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    var uuid = Uuid();
-    var id = uuid.v4();
-    String receiverDID = peerInfo["did"]!;
-    VPRequestMessage vpRequestMessage = VPRequestMessage(
-      id: id,
-      from: did,
-      to: [receiverDID],
-      createdTime: currentTime,
-      expiresTime: currentTime + 30000,
-      vcs: vcs,
-      challenge: challenge,
-    );
+      int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      var uuid = Uuid();
+      var id = uuid.v4();
+      String receiverDID = peerInfo["did"]!;
+      VPRequestMessage vpRequestMessage = VPRequestMessage(
+        id: id,
+        from: did,
+        to: [receiverDID],
+        createdTime: currentTime,
+        expiresTime: currentTime + 30000,
+        vcs: vcs,
+        challenge: challenge,
+      );
 
-    String peerSocketId = peerInfo["socketId"]!;
-    String jwe = await makeJWEFromMessage(
-      mnemonic,
-      receiverDID,
-      this,
-      vpRequestMessage.toJson(),
-    );
-    socket.emit("message", {"to": peerSocketId, "m": jwe});
-    print("VPRequestMessage sent to $peerSocketId");
+      String peerSocketId = peerInfo["socketId"]!;
+      String jwe = await makeJWEFromMessage(
+        mnemonic,
+        receiverDID,
+        this,
+        vpRequestMessage.toJson(),
+      );
+      socket.emit("message", {"to": peerSocketId, "m": jwe});
+      print("VPRequestMessage sent to $peerSocketId");
+    } catch (e) {
+      throw Exception("Error in sendVPRequestMessage: $e");
+    }
   }
 }
 
