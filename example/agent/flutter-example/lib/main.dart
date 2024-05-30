@@ -5,6 +5,31 @@ import 'package:infra_did_comm_dart/infra_did_comm_dart.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+Map<String, dynamic> vpRejectCallback(
+    List<RequestVC> requestVCs, String challenge) {
+  // If want to reject the request, return the following JSON
+  return {
+    "status": "reject",
+    "reason": "I don't have the requested VC",
+  };
+}
+
+Map<String, dynamic> vpSubmitLaterCallback(
+    List<RequestVC> requestVCs, String challenge) {
+  // If want to submit later the requested VCs, return the following JSON
+  return {"status": "submitLater"};
+}
+
+Map<String, dynamic> vpSubmitCallback(
+    List<RequestVC> requestVCs, String challenge) {
+  String vp =
+      '''{"@context":["https://www.w3.org/2018/credentials/v1","https://www.w3.org/2018/credentials/examples/v1"],"id":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z","type":["VerifiableCredential"],"credentialSubject":[{"id":"did:example:d23dd687a7dc6787646f2eb98d0"}],"issuanceDate":"2024-05-23T06:08:03.039Z","issuer":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z","proofOptions":{"@context":"https://w3id.org/security/suites/ed25519-2020/v1","type":"Ed25519","proofPurpose":"assertionMethod","verificationMethod":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z#key-2","created":"2024-05-30T05:05:23.826063Z","challenge":"challenge","proofValue":"z5ogf7czdcBwWmPy6ZmzpjsYYnSkWKwic3uF4Ac7otXcPQcPNidtAUsrULz3UwS4YxtaEV4J2AoMJCgSE7TZ794Bt"}}''';
+  return {
+    "status": "submit",
+    "vp": deflateAndEncode(jsonDecode(vp)),
+  };
+}
+
 void main() {
   runApp(const MyApp());
 }
@@ -16,12 +41,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Example App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'infra-did-comm-dart example app'),
     );
   }
 }
@@ -78,11 +103,22 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> connectWebsocket() async {
     agent.connect();
-    agent.setVPRequestCallback((requestVCs, challenge) => {"status": "reject"});
   }
 
   void disconnectWebsocket() {
     agent.disconnect();
+  }
+
+  void setVPSubmitCallback() {
+    agent.setVPRequestCallback(vpSubmitCallback);
+  }
+
+  void setVPSubmitLaterCallback() {
+    agent.setVPRequestCallback(vpSubmitLaterCallback);
+  }
+
+  void setVPRejectCallback() {
+    agent.setVPRequestCallback(vpRejectCallback);
   }
 
   Future<void> sendVPRequestMessage() async {
@@ -121,6 +157,15 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
                 onPressed: disconnectWebsocket,
                 child: const Text("wsDisconnect")),
+            ElevatedButton(
+                onPressed: setVPRejectCallback,
+                child: const Text("Set VP Reject Callback")),
+            ElevatedButton(
+                onPressed: setVPSubmitCallback,
+                child: const Text("Set VP Submit Callback")),
+            ElevatedButton(
+                onPressed: setVPSubmitLaterCallback,
+                child: const Text("Set VP Submit Later Callback")),
             ElevatedButton(
                 onPressed: sendVPRequestMessage,
                 child: const Text("Send VP Request Message")),
