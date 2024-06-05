@@ -321,8 +321,8 @@ Future<bool> verifyVP(
 
     InfraSS58DIDResolver resolver =
         InfraSS58DIDResolver("wss://did.stage.infrablockspace.net");
-    bool isVerified =
-        await InfraSS58VerifiablePresentation().verifyVp(vp, resolver);
+    bool isVerified = await InfraSS58VerifiablePresentation()
+        .verifyVp(vp, resolver, null, null);
 
     return isVerified;
   } catch (e) {
