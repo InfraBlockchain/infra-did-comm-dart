@@ -5,3 +5,5 @@
 /// - `compactJSON`: Represents compact JSON compression.
 /// - `minimalCompactJSON`: Represents minimal compact JSON compression.
 enum CompressionLevel { json, compactJSON, minimalCompactJSON }
+
+enum VPRequestResponseType { submit, reject, submitLater }
