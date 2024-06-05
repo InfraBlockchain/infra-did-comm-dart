@@ -308,11 +308,10 @@ packages:
   infra_did_dart:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "feature/chain"
-      resolved-ref: "4d3557d00d168f043e668094bba1879bb94ddcbd"
-      url: "https://github.com/InfraBlockchain/infra-did-dart.git"
-    source: git
+      name: infra_did_dart
+      sha256: "2315b58a15140d9cc7bcc38008c885b961bddfa10a373bf12d7fb05153c0deb9"
+      url: "https://pub.dev"
+    source: hosted
     version: "1.0.0"
   intl:
     dependency: transitive
