@@ -5,6 +5,31 @@ import 'package:infra_did_comm_dart/infra_did_comm_dart.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
+Map<String, dynamic> vpRejectCallback(
+    List<RequestVC> requestVCs, String challenge) {
+  // If want to reject the request, return the following JSON
+  return {
+    "status": "reject",
+    "reason": "I don't have the requested VC",
+  };
+}
+
+Map<String, dynamic> vpSubmitLaterCallback(
+    List<RequestVC> requestVCs, String challenge) {
+  // If want to submit later the requested VCs, return the following JSON
+  return {"status": "submitLater"};
+}
+
+Map<String, dynamic> vpSubmitCallback(
+    List<RequestVC> requestVCs, String challenge) {
+  String vp = '''
+{"@context":["https://www.w3.org/2018/credentials/v1","https://www.w3.org/2018/credentials/examples/v1","https://schema.org"],"verifiableCredential":[{"@context":["https://www.w3.org/2018/credentials/v1","https://schema.org"],"type":["VerifiableCredential"],"credentialSubject":{"id":"did:example:abcdefg","degree":{"type":"BachelorDegree","name":"Bachelor of Science and Arts"}},"issuer":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z","proof":{"type":"Ed25519Signature2018","created":"2024-05-30T00:49:07Z","verificationMethod":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z#keys-1","proofPurpose":"assertionMethod","proofValue":"z3dk2Jgi9JxwnduAJ3UKuWhhF4rco1jWUDuD1rHZcHT7pJ3ns5Yetj3CnJhSf2prh6xaiDf919kHjLdruWVM9NxC8"},"id":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z","issuanceDate":"2024-05-30T00:49:07.758Z"}],"proof":{"type":"Ed25519Signature2018","created":"2024-05-30T00:49:08Z","verificationMethod":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z#keys-1","proofPurpose":"authentication","challenge":"0xb0342a26c7d96ce9123c5018f93ff1f5cf48af00e91bbbfae2f7be76066a19f9","domain":"newnal","proofValue":"zgDHb3WmrJFJdRFvb358unxtkYm1DeZnigrLxpEAwvXcBxE8BG38kDwSU5PVqyJK6dx2v3fKnf2xkFuiEHtJ3QPA"},"id":"http://university.example/credentials/5228473","type":["VerifiablePresentation"],"holder":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z"}''';
+  return {
+    "status": "submit",
+    "vp": vp,
+  };
+}
+
 void main() {
   runApp(const MyApp());
 }
@@ -16,12 +41,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Example App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'infra-did-comm-dart example app'),
     );
   }
 }
@@ -45,7 +70,6 @@ class _MyHomePageState extends State<MyHomePage> {
     mnemonic: mnemonic,
     role: "HOLDER",
   );
-
   late QRViewController controller;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   DateTime? lastScan;
@@ -85,6 +109,27 @@ class _MyHomePageState extends State<MyHomePage> {
     agent.disconnect();
   }
 
+  void setVPSubmitCallback() {
+    agent.setVPRequestCallback(vpSubmitCallback);
+  }
+
+  void setVPSubmitLaterCallback() {
+    agent.setVPRequestCallback(vpSubmitLaterCallback);
+  }
+
+  void setVPRejectCallback() {
+    agent.setVPRequestCallback(vpRejectCallback);
+  }
+
+  Future<void> sendVPRequestMessage() async {
+    if (!agent.isDIDConnected) {
+      print("DID is not connected");
+      return;
+    }
+    List<RequestVC> requestVCs = [RequestVC(vcType: "test")];
+    agent.sendVPRequestMessage(requestVCs, "challenge");
+  }
+
   @override
   Widget build(BuildContext context) {
     if (didConnected) {
@@ -112,6 +157,18 @@ class _MyHomePageState extends State<MyHomePage> {
             ElevatedButton(
                 onPressed: disconnectWebsocket,
                 child: const Text("wsDisconnect")),
+            ElevatedButton(
+                onPressed: setVPRejectCallback,
+                child: const Text("Set VP Reject Callback")),
+            ElevatedButton(
+                onPressed: setVPSubmitCallback,
+                child: const Text("Set VP Submit Callback")),
+            ElevatedButton(
+                onPressed: setVPSubmitLaterCallback,
+                child: const Text("Set VP Submit Later Callback")),
+            ElevatedButton(
+                onPressed: sendVPRequestMessage,
+                child: const Text("Send VP Request Message")),
             ElevatedButton(
               onPressed: () {
                 showDialog(
@@ -184,7 +241,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   padding: const EdgeInsets.all(16.0),
                   child: FloatingActionButton(
                     onPressed: () {
-                      agent.disconnect();
                       Navigator.pop(context); // 뒤로가기 버튼
                     },
                     tooltip: '뒤로가기',
@@ -279,7 +335,6 @@ class _QRCodeModalState extends State<QRCodeModal> {
         ),
         ElevatedButton(
           onPressed: () {
-            widget.agent.disconnect();
             Navigator.of(context).pop();
           },
           child: const Text("닫기"),

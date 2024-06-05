@@ -43,10 +43,8 @@ class DIDConnectRequestMessage {
       }
       return DIDConnectRequestMessage(
         from: json["from"],
-        createdTime:
-            json.containsKey("created_time") ? json["created_time"] : 0,
-        expiresTime:
-            json.containsKey("expires_time") ? json["expires_time"] : 0,
+        createdTime: json.containsKey("createdTime") ? json["createdTime"] : 0,
+        expiresTime: json.containsKey("expiresTime") ? json["expiresTime"] : 0,
         context: json["body"].containsKey("context")
             ? Context.fromJson(json["body"]["context"])
             : Context.fromCompactJson(json["body"]["c"]),
@@ -99,8 +97,8 @@ class DIDConnectRequestMessage {
       final Map<String, dynamic> data = {};
       data["type"] = type;
       data["from"] = from;
-      data["created_time"] = createdTime;
-      data["expires_time"] = expiresTime;
+      data["createdTime"] = createdTime;
+      data["expiresTime"] = expiresTime;
       data["body"] = {
         "initiator": initiator.toJson(),
         "context": context.toJson(),
@@ -117,8 +115,8 @@ class DIDConnectRequestMessage {
       final Map<String, dynamic> data = {};
       data["type"] = type;
       data["from"] = from;
-      data["created_time"] = createdTime;
-      data["expires_time"] = expiresTime;
+      data["createdTime"] = createdTime;
+      data["expiresTime"] = expiresTime;
       data["body"] = {
         "i": initiator.toCompactJson(),
         "c": context.toCompactJson(),

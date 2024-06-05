@@ -47,8 +47,8 @@ class DIDAuthInitMessage {
       data["type"] = type;
       data["from"] = from;
       data["to"] = to;
-      if (createdTime != null) data["created_time"] = createdTime;
-      if (expiresTime != null) data["expires_time"] = expiresTime;
+      if (createdTime != null) data["createdTime"] = createdTime;
+      if (expiresTime != null) data["expiresTime"] = expiresTime;
       data["body"] = {
         "context": context.toJson(),
         "socketId": socketId,

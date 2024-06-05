@@ -40,10 +40,8 @@ class DIDConnectedMessage {
         id: json["id"],
         from: json["from"],
         to: json["to"],
-        createdTime:
-            json.containsKey("created_time") ? json["created_time"] : 0,
-        expiresTime:
-            json.containsKey("expires_time") ? json["expires_time"] : 0,
+        createdTime: json.containsKey("createdTime") ? json["createdTime"] : 0,
+        expiresTime: json.containsKey("expiresTime") ? json["expiresTime"] : 0,
         context: json["body"].containsKey("context")
             ? Context.fromJson(json["body"]["context"])
             : Context.fromCompactJson(json["body"]["c"]),
@@ -62,8 +60,8 @@ class DIDConnectedMessage {
       data["type"] = type;
       data["from"] = from;
       data["to"] = to;
-      if (createdTime != null) data["created_time"] = createdTime;
-      if (expiresTime != null) data["expires_time"] = expiresTime;
+      if (createdTime != null) data["createdTime"] = createdTime;
+      if (expiresTime != null) data["expiresTime"] = expiresTime;
       data["body"] = {
         "context": context.toJson(),
         "status": status,

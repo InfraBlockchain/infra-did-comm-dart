@@ -1,3 +1,5 @@
+import "dart:io";
+
 import "package:infra_did_comm_dart/infra_did_comm_dart.dart";
 
 bool didAuthCallback(String peerDID) {
@@ -15,10 +17,10 @@ void didAuthFailedCallback(String peerDID) {
 
 main() async {
   // If you want to run the initiatedByHolderScenario, uncomment the line below
-  // initiatedByHolderScenario();
+  initiatedByHolderScenario();
 
   // If you want to run the initiatedByVerifierScenario, uncomment the line below
-  initiatedByVerifierScenario();
+  // initiatedByVerifierScenario();
 }
 
 initiatedByHolderScenario() async {
@@ -40,7 +42,7 @@ initiatedByHolderScenario() async {
 
   String? socketId = await agent.socketId;
   if (socketId != null) {
-    String holderSocketId = "Sihuz9kg2cWz4gcdAAXz";
+    String holderSocketId = "M_iAfCS_9oUpWRX0ADBb";
     final minimalCompactJson = {
       "from": "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
       "body": {
@@ -56,6 +58,13 @@ initiatedByHolderScenario() async {
     await agent.sendDIDAuthInitMessage(encoded);
   } else {
     print("Socket ID is null");
+  }
+
+  await waitForDIDConnected(agent);
+
+  if (agent.isDIDConnected) {
+    print("DID is connected");
+    agent.sendVPRequestMessage([], "challenge");
   }
 }
 
@@ -93,5 +102,11 @@ initiatedByVerifierScenario() async {
     print("Verifier make encoded request message: $encoded");
   } else {
     print("Socket ID is null");
+  }
+}
+
+Future<void> waitForDIDConnected(InfraDIDCommAgent agent) async {
+  while (!agent.isDIDConnected) {
+    await Future.delayed(Duration(seconds: 1));
   }
 }

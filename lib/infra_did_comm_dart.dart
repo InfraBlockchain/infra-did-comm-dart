@@ -8,6 +8,13 @@ export "messages/did_auth_init.dart";
 export "messages/did_auth.dart";
 export "messages/did_connect_request.dart";
 export "messages/did_connected.dart";
+export "messages/vp_request_message.dart";
+export "messages/submit_vp_message.dart";
+export "messages/submit_vp_response_message.dart";
+export "messages/submut_vp_later_message.dart";
+export "messages/submut_vp_later_response_message.dart";
+export "messages/reject_request_vp_message.dart";
+export "messages/reject_request_vp_response_message.dart";
 
 export "crypto/jwe.dart";
 export "crypto/jws.dart";
