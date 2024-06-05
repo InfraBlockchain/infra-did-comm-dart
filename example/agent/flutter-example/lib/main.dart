@@ -22,11 +22,11 @@ Map<String, dynamic> vpSubmitLaterCallback(
 
 Map<String, dynamic> vpSubmitCallback(
     List<RequestVC> requestVCs, String challenge) {
-  String vp =
-      '''{"@context":["https://www.w3.org/2018/credentials/v1","https://www.w3.org/2018/credentials/examples/v1"],"id":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z","type":["VerifiableCredential"],"credentialSubject":[{"id":"did:example:d23dd687a7dc6787646f2eb98d0"}],"issuanceDate":"2024-05-23T06:08:03.039Z","issuer":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z","proofOptions":{"@context":"https://w3id.org/security/suites/ed25519-2020/v1","type":"Ed25519","proofPurpose":"assertionMethod","verificationMethod":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z#key-2","created":"2024-05-30T05:05:23.826063Z","challenge":"challenge","proofValue":"z5ogf7czdcBwWmPy6ZmzpjsYYnSkWKwic3uF4Ac7otXcPQcPNidtAUsrULz3UwS4YxtaEV4J2AoMJCgSE7TZ794Bt"}}''';
+  String vp = '''
+{"@context":["https://www.w3.org/2018/credentials/v1","https://www.w3.org/2018/credentials/examples/v1","https://schema.org"],"verifiableCredential":[{"@context":["https://www.w3.org/2018/credentials/v1","https://schema.org"],"type":["VerifiableCredential"],"credentialSubject":{"id":"did:example:abcdefg","degree":{"type":"BachelorDegree","name":"Bachelor of Science and Arts"}},"issuer":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z","proof":{"type":"Ed25519Signature2018","created":"2024-05-30T00:49:07Z","verificationMethod":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z#keys-1","proofPurpose":"assertionMethod","proofValue":"z3dk2Jgi9JxwnduAJ3UKuWhhF4rco1jWUDuD1rHZcHT7pJ3ns5Yetj3CnJhSf2prh6xaiDf919kHjLdruWVM9NxC8"},"id":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z","issuanceDate":"2024-05-30T00:49:07.758Z"}],"proof":{"type":"Ed25519Signature2018","created":"2024-05-30T00:49:08Z","verificationMethod":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z#keys-1","proofPurpose":"authentication","challenge":"0xb0342a26c7d96ce9123c5018f93ff1f5cf48af00e91bbbfae2f7be76066a19f9","domain":"newnal","proofValue":"zgDHb3WmrJFJdRFvb358unxtkYm1DeZnigrLxpEAwvXcBxE8BG38kDwSU5PVqyJK6dx2v3fKnf2xkFuiEHtJ3QPA"},"id":"http://university.example/credentials/5228473","type":["VerifiablePresentation"],"holder":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z"}''';
   return {
     "status": "submit",
-    "vp": deflateAndEncode(jsonDecode(vp)),
+    "vp": vp,
   };
 }
 
