@@ -302,16 +302,15 @@ packages:
       path: "../../.."
       relative: true
     source: path
-    version: "0.5.0"
+    version: "0.7.1"
   infra_did_dart:
-    dependency: transitive
+    dependency: "direct main"
     description:
-      path: "."
-      ref: "feature/chain"
-      resolved-ref: a66c23ee78d84a7254cbf8dc82f8105a425b29ae
-      url: "https://github.com/InfraBlockchain/infra-did-dart.git"
-    source: git
-    version: "1.0.0"
+      name: infra_did_dart
+      sha256: "2d26fd77bd55b69bac9b1c1330476da31feb981a2ac04209583907edac85a085"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.2"
   intl:
     dependency: transitive
     description:

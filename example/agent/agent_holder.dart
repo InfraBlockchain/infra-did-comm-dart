@@ -15,7 +15,7 @@ void didAuthFailedCallback(String peerDID) {
   print("DID Auth Failed Callback");
 }
 
-Map<String, dynamic> vpRequestCallback(
+Future<Map<String, dynamic>> vpRequestCallback(
     List<RequestVC> requestVCs, String challenge) {
   // If want to reject the request, return the following JSON
   // return {
@@ -29,10 +29,10 @@ Map<String, dynamic> vpRequestCallback(
   // If want to submit the requested VCs, return the following JSON
   String vp =
       '''{"@context":["https://www.w3.org/2018/credentials/v1","https://www.w3.org/2018/credentials/examples/v1"],"id":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z","type":["VerifiableCredential"],"credentialSubject":[{"id":"did:example:d23dd687a7dc6787646f2eb98d0"}],"issuanceDate":"2024-05-23T06:08:03.039Z","issuer":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z","proofOptions":{"@context":"https://w3id.org/security/suites/ed25519-2020/v1","type":"Ed25519","proofPurpose":"assertionMethod","verificationMethod":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z#key-2","created":"2024-05-30T05:05:23.826063Z","challenge":"challenge","proofValue":"z5ogf7czdcBwWmPy6ZmzpjsYYnSkWKwic3uF4Ac7otXcPQcPNidtAUsrULz3UwS4YxtaEV4J2AoMJCgSE7TZ794Bt"}}''';
-  return {
+  return Future.value({
     "status": "submit",
     "vp": jsonDecode(vp),
-  };
+  });
 }
 
 main() async {

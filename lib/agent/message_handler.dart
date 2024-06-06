@@ -31,7 +31,7 @@ Future<void> messageHandler(
   bool Function(String peerDID)? didAuthCallback,
   Function(String peerDID)? didConnectedCallback,
   Function(String peerDID)? didAuthFailedCallback,
-  Map<String, dynamic> Function(
+  Future<Map<String, dynamic>> Function(
     List<RequestVC> requestVCs,
     String challenge,
   )? vpRequestCallback,
@@ -117,7 +117,7 @@ Future<void> messageHandler(
         if (jwsPayload["type"] == "VPReq") {
           print("VPRequestMessage Message Received");
           if (vpRequestCallback != null) {
-            Map<String, dynamic> result = vpRequestCallback(
+            Map<String, dynamic> result = await vpRequestCallback(
               (jwsPayload["body"]["vcRequirements"] as List<dynamic>)
                   .map<RequestVC>((vc) => RequestVC.fromJson(vc))
                   .toList(),
@@ -321,8 +321,8 @@ Future<bool> verifyVP(
 
     InfraSS58DIDResolver resolver =
         InfraSS58DIDResolver("wss://did.stage.infrablockspace.net");
-    bool isVerified = await InfraSS58VerifiablePresentation()
-        .verifyVp(vp, resolver, null, null);
+    bool isVerified =
+        await InfraSS58VerifiablePresentation().verifyVp(vp, resolver);
 
     return isVerified;
   } catch (e) {

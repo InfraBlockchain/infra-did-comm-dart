@@ -28,11 +28,11 @@ class InfraDIDCommAgent {
   late bool Function(String peerDID) didAuthCallback = (String peerDID) => true;
   late Function(String peerDID) didConnectedCallback = (String peerDID) {};
   late Function(String peerDID) didAuthFailedCallback = (String peerDID) {};
-  late Map<String, dynamic> Function(
+  late Future<Map<String, dynamic>> Function(
     List<RequestVC> requestVCs,
     String challenge,
   ) vpRequestCallback = (List<RequestVC> requestVCs, String challenge) {
-    return {"status": "reject"};
+    return Future.value({"status": "reject"});
   };
 
   Completer<String?> _socketIdCompleter = Completer();
@@ -111,7 +111,8 @@ class InfraDIDCommAgent {
   }
 
   void setVPRequestCallback(
-    Map<String, dynamic> Function(List<RequestVC> requestVCs, String challenge)
+    Future<Map<String, dynamic>> Function(
+            List<RequestVC> requestVCs, String challenge)
         callback,
   ) {
     vpRequestCallback = callback;

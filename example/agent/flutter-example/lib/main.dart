@@ -2,31 +2,95 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:infra_did_comm_dart/infra_did_comm_dart.dart';
+import 'package:infra_did_dart/infra_did_dart.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-Map<String, dynamic> vpRejectCallback(
+Future<Map<String, dynamic>> vpRejectCallback(
     List<RequestVC> requestVCs, String challenge) {
   // If want to reject the request, return the following JSON
-  return {
+  return Future.value({
     "status": "reject",
     "reason": "I don't have the requested VC",
-  };
+  });
 }
 
-Map<String, dynamic> vpSubmitLaterCallback(
+Future<Map<String, dynamic>> vpSubmitLaterCallback(
     List<RequestVC> requestVCs, String challenge) {
   // If want to submit later the requested VCs, return the following JSON
-  return {"status": "submitLater"};
+  return Future.value({"status": "submitLater"});
 }
 
-Map<String, dynamic> vpSubmitCallback(
-    List<RequestVC> requestVCs, String challenge) {
-  String vp = '''
-{"@context":["https://www.w3.org/2018/credentials/v1","https://www.w3.org/2018/credentials/examples/v1","https://schema.org"],"verifiableCredential":[{"@context":["https://www.w3.org/2018/credentials/v1","https://schema.org"],"type":["VerifiableCredential"],"credentialSubject":{"id":"did:example:abcdefg","degree":{"type":"BachelorDegree","name":"Bachelor of Science and Arts"}},"issuer":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z","proof":{"type":"Ed25519Signature2018","created":"2024-05-30T00:49:07Z","verificationMethod":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z#keys-1","proofPurpose":"assertionMethod","proofValue":"z3dk2Jgi9JxwnduAJ3UKuWhhF4rco1jWUDuD1rHZcHT7pJ3ns5Yetj3CnJhSf2prh6xaiDf919kHjLdruWVM9NxC8"},"id":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z","issuanceDate":"2024-05-30T00:49:07.758Z"}],"proof":{"type":"Ed25519Signature2018","created":"2024-05-30T00:49:08Z","verificationMethod":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z#keys-1","proofPurpose":"authentication","challenge":"0xb0342a26c7d96ce9123c5018f93ff1f5cf48af00e91bbbfae2f7be76066a19f9","domain":"newnal","proofValue":"zgDHb3WmrJFJdRFvb358unxtkYm1DeZnigrLxpEAwvXcBxE8BG38kDwSU5PVqyJK6dx2v3fKnf2xkFuiEHtJ3QPA"},"id":"http://university.example/credentials/5228473","type":["VerifiablePresentation"],"holder":"did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z"}''';
+Future<Map<String, dynamic>> vpSubmitCallback(
+    List<RequestVC> requestVCs, String challenge) async {
+  String phrase =
+      "bamboo absorb chief dog box envelope leisure pink alone service spin more";
+  InfraSS58DIDSet didSet =
+      await InfraSS58DID.generateSS58DIDFromPhrase(phrase, "01");
+
+  InfraSS58DID infraSS58DID = InfraSS58DID(
+    didSet: didSet,
+    chainEndpoint: "wss://did.stage.infrablockspace.net",
+    controllerDID: didSet.did,
+    controllerMnemonic: didSet.mnemonic,
+  );
+
+  String unsignedVP = """
+{
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "https://www.w3.org/2018/credentials/examples/v1",
+    "https://schema.org"
+  ],
+  "verifiableCredential": [
+    {
+      "@context": [
+        "https://www.w3.org/2018/credentials/v1",
+        "https://schema.org"
+      ],
+      "id": "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
+      "type": [
+        "VerifiableCredential"
+      ],
+      "credentialSubject": [
+        {
+          "id": "did:example:d23dd687a7dc6787646f2eb98d0"
+        }
+      ],
+      "issuanceDate": "2024-05-23T06:08:03.039Z",
+      "issuer": "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z",
+      "proof": {
+        "type": "Ed25519Signature2018",
+        "proofPurpose": "assertionMethod",
+        "verificationMethod": "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z#keys-1",
+        "created": "2024-06-05T07:44:22.102309Z",
+        "proofValue": "zDsXfPU4MyohXEATJSYUuVehhRsjc8dShBEmTx7oEgJaqzCzEHz3SgwEyRKDtxegifHhKtY3wBwL2z9H2Rt5jv2h"
+      }
+    }
+  ],
+  "id": "http://example.edu/credentials/2803",
+  "type": [
+    "VerifiablePresentation",
+    "CredentialManagerPresentation"
+  ],
+  "holder": "did:infra:01:5EX1sTeRrA7nwpFmapyUhMhzJULJSs9uByxHTc6YTAxsc58z"
+}
+    """;
+  CredentialSigner cs = CredentialSigner(
+    did: didSet.did,
+    keyId: "keys-1",
+    keyType: "Ed25519VerificationKey2018",
+    seed: didSet.seed,
+    mnemonic: didSet.mnemonic,
+  );
+
+  final vp = await InfraSS58VerifiablePresentation().issueVp(
+      jsonDecode(unsignedVP), infraSS58DID.didSet.did, cs,
+      domain: "newnal", challenge: challenge, purpose: "authentication");
+
   return {
     "status": "submit",
-    "vp": vp,
+    "vp": jsonEncode(vp),
   };
 }
 
