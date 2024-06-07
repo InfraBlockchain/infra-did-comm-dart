@@ -36,9 +36,9 @@ Future<void> messageHandler(
     String challenge,
   )? vpRequestCallback,
   bool Function(Map<String, dynamic> vp)? vpVerifyCallback,
-  Function(SubmitVPResponseMessage message)? vpSubmitCallback,
-  Function(SubmitVPLaterResponseMessage message)? vpSubmitLaterCallback,
-  Function(RejectRequestVPResponseMessage message)? vpRejectCallback,
+  Function(SubmitVPResponseMessage message)? vpSubmitResCallback,
+  Function(SubmitVPLaterResponseMessage message)? vpSubmitLaterResCallback,
+  Function(RejectRequestVPMessage message)? vpRejectCallback,
 ) async {
   try {
     Map<String, dynamic> header = extractJWEHeader(jwe);
@@ -186,11 +186,16 @@ Future<void> messageHandler(
         }
         if (jwsPayload["type"] == "VPSubmitRes") {
           print("SubmitVPRes Message Received");
-          if (vpSubmitCallback != null) {
-            vpSubmitCallback(SubmitVPResponseMessage.fromJson(jwsPayload));
+          if (vpSubmitResCallback != null) {
+            vpSubmitResCallback(SubmitVPResponseMessage.fromJson(jwsPayload));
           }
         }
         if (jwsPayload["type"] == "VPReqReject") {
+          if (vpRejectCallback != null) {
+            vpRejectCallback(
+              RejectRequestVPMessage.fromJson(jwsPayload),
+            );
+          }
           await sendRejectRequestVPResponseMessage(
             mnemonic,
             did,
@@ -200,11 +205,6 @@ Future<void> messageHandler(
         }
         if (jwsPayload["type"] == "VPReqRejectRes") {
           print("RejectReqVPRes Message Received");
-          if (vpRejectCallback != null) {
-            vpRejectCallback(
-              RejectRequestVPResponseMessage.fromJson(jwsPayload),
-            );
-          }
         }
         if (jwsPayload["type"] == "VPSubmitLater") {
           await sendSubmitVPLaterResponseMessage(
@@ -217,8 +217,8 @@ Future<void> messageHandler(
         }
         if (jwsPayload["type"] == "VPSubmitLaterRes") {
           print("SubmitVPLaterRes Message Received");
-          if (vpSubmitLaterCallback != null) {
-            vpSubmitLaterCallback(
+          if (vpSubmitLaterResCallback != null) {
+            vpSubmitLaterResCallback(
               SubmitVPLaterResponseMessage.fromJson(jwsPayload),
             );
           }

@@ -35,12 +35,12 @@ class InfraDIDCommAgent {
   };
   late bool Function(Map<String, dynamic> vp) vpVerifyCallback =
       (Map<String, dynamic> vp) => true;
-  late Function(SubmitVPResponseMessage message) vpSubmitCallback =
+  late Function(SubmitVPResponseMessage message) vpSubmitResCallback =
       (SubmitVPResponseMessage message) {};
-  late Function(SubmitVPLaterResponseMessage message) vpSubmitLaterCallback =
+  late Function(SubmitVPLaterResponseMessage message) vpSubmitLaterResCallback =
       (SubmitVPLaterResponseMessage message) {};
-  late Function(RejectRequestVPResponseMessage message) vpRejectCallback =
-      (RejectRequestVPResponseMessage message) {};
+  late Function(RejectRequestVPMessage message) vpRejectCallback =
+      (RejectRequestVPMessage message) {};
 
   Completer<String?> _socketIdCompleter = Completer();
   Future<String?> get socketId => _socketIdCompleter.future;
@@ -130,18 +130,19 @@ class InfraDIDCommAgent {
     vpVerifyCallback = callback;
   }
 
-  void setVPSubmitCallback(Function(SubmitVPResponseMessage message) callback) {
-    vpSubmitCallback = callback;
+  void setVPSubmitResCallback(
+      Function(SubmitVPResponseMessage message) callback) {
+    vpSubmitResCallback = callback;
   }
 
-  void setVPSubmitLaterCallback(
+  void setVPSubmitLaterResCallback(
     Function(SubmitVPLaterResponseMessage message) callback,
   ) {
-    vpSubmitLaterCallback = callback;
+    vpSubmitLaterResCallback = callback;
   }
 
   void setVPRejectCallback(
-    Function(RejectRequestVPResponseMessage message) callback,
+    Function(RejectRequestVPMessage message) callback,
   ) {
     vpRejectCallback = callback;
   }
@@ -250,8 +251,8 @@ class InfraDIDCommAgent {
           didAuthFailedCallback,
           vpRequestCallback,
           vpVerifyCallback,
-          vpSubmitCallback,
-          vpSubmitLaterCallback,
+          vpSubmitResCallback,
+          vpSubmitLaterResCallback,
           vpRejectCallback,
         ),
       },
