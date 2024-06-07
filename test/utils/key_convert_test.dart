@@ -19,7 +19,7 @@ void main() {
   });
 
   test("Should convert to publickey from seed", () async {
-    final fromSeed = await publicKeyFromSeed(privateKey);
+    final fromSeed = publicKeyFromSeed(privateKey);
     expect(hex.encode(fromSeed), publicKey);
   });
 

@@ -1,5 +1,4 @@
 import "package:infra_did_comm_dart/infra_did_comm_dart.dart";
-import "package:infra_did_comm_dart/types/types.dart";
 import "package:test/test.dart";
 
 void main() {
@@ -320,7 +319,9 @@ void main() {
 
     final didConnectRequestMessage =
         DIDConnectRequestMessage.decode(minimalCompactEncoded);
-    expect(didConnectRequestMessage.toMinimalCompactJson(),
-        equals(minimalCompactJson));
+    expect(
+      didConnectRequestMessage.toMinimalCompactJson(),
+      equals(minimalCompactJson),
+    );
   });
 }

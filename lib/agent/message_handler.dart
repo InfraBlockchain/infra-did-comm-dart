@@ -35,6 +35,10 @@ Future<void> messageHandler(
     List<RequestVC> requestVCs,
     String challenge,
   )? vpRequestCallback,
+  bool Function(Map<String, dynamic> vp)? vpVerifyCallback,
+  Function(SubmitVPResponseMessage message)? vpSubmitCallback,
+  Function(SubmitVPLaterResponseMessage message)? vpSubmitLaterCallback,
+  Function(RejectRequestVPResponseMessage message)? vpRejectCallback,
 ) async {
   try {
     Map<String, dynamic> header = extractJWEHeader(jwe);
@@ -161,6 +165,17 @@ Future<void> messageHandler(
             agent.vpChallenge,
           );
 
+          if (vpVerifyCallback != null) {
+            String jsonStringVP =
+                utf8.decode(base64Url.decode(jwsPayload["body"]["vp"]));
+            Map<String, dynamic> vp = json.decode(jsonStringVP);
+
+            bool customVerification = vpVerifyCallback(vp);
+            if (!customVerification) {
+              isVerified = false;
+            }
+          }
+
           await sendSubmitVPResponseMessage(
             mnemonic,
             did,
@@ -171,6 +186,9 @@ Future<void> messageHandler(
         }
         if (jwsPayload["type"] == "VPSubmitRes") {
           print("SubmitVPRes Message Received");
+          if (vpSubmitCallback != null) {
+            vpSubmitCallback(SubmitVPResponseMessage.fromJson(jwsPayload));
+          }
         }
         if (jwsPayload["type"] == "VPReqReject") {
           await sendRejectRequestVPResponseMessage(
@@ -182,6 +200,10 @@ Future<void> messageHandler(
         }
         if (jwsPayload["type"] == "VPReqRejectRes") {
           print("RejectReqVPRes Message Received");
+          if (vpRejectCallback != null) {
+            vpRejectCallback(
+                RejectRequestVPResponseMessage.fromJson(jwsPayload));
+          }
         }
         if (jwsPayload["type"] == "VPSubmitLater") {
           await sendSubmitVPLaterResponseMessage(
@@ -194,6 +216,10 @@ Future<void> messageHandler(
         }
         if (jwsPayload["type"] == "VPSubmitLaterRes") {
           print("SubmitVPLaterRes Message Received");
+          if (vpSubmitLaterCallback != null) {
+            vpSubmitLaterCallback(
+                SubmitVPLaterResponseMessage.fromJson(jwsPayload));
+          }
         }
       }
     }

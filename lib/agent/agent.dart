@@ -4,7 +4,6 @@ import "package:convert/convert.dart";
 import "package:http/http.dart" as http;
 
 import "package:infra_did_comm_dart/agent/message_handler.dart";
-import "package:infra_did_comm_dart/messages/vp_request_message.dart";
 import "package:socket_io_client/socket_io_client.dart" as IO;
 import "package:uuid/uuid.dart";
 
@@ -34,6 +33,14 @@ class InfraDIDCommAgent {
   ) vpRequestCallback = (List<RequestVC> requestVCs, String challenge) {
     return Future.value({"status": "reject"});
   };
+  late bool Function(Map<String, dynamic> vp) vpVerifyCallback =
+      (Map<String, dynamic> vp) => true;
+  late Function(SubmitVPResponseMessage message) vpSubmitCallback =
+      (SubmitVPResponseMessage message) {};
+  late Function(SubmitVPLaterResponseMessage message) vpSubmitLaterCallback =
+      (SubmitVPLaterResponseMessage message) {};
+  late Function(RejectRequestVPResponseMessage message) vpRejectCallback =
+      (RejectRequestVPResponseMessage message) {};
 
   Completer<String?> _socketIdCompleter = Completer();
   Future<String?> get socketId => _socketIdCompleter.future;
@@ -116,6 +123,24 @@ class InfraDIDCommAgent {
         callback,
   ) {
     vpRequestCallback = callback;
+  }
+
+  void setVPVerifyCallback(bool Function(Map<String, dynamic> vp) callback) {
+    vpVerifyCallback = callback;
+  }
+
+  void setVPSubmitCallback(Function(SubmitVPResponseMessage message) callback) {
+    vpSubmitCallback = callback;
+  }
+
+  void setVPSubmitLaterCallback(
+      Function(SubmitVPLaterResponseMessage message) callback) {
+    vpSubmitLaterCallback = callback;
+  }
+
+  void setVPRejectCallback(
+      Function(RejectRequestVPResponseMessage message) callback) {
+    vpRejectCallback = callback;
   }
 
   void setVPLaterCallbackEndpoint(String vpLaterCallbackEndpoint) {
@@ -221,6 +246,10 @@ class InfraDIDCommAgent {
           didConnectedCallback,
           didAuthFailedCallback,
           vpRequestCallback,
+          vpVerifyCallback,
+          vpSubmitCallback,
+          vpSubmitLaterCallback,
+          vpRejectCallback,
         ),
       },
     );
