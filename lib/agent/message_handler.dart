@@ -224,10 +224,9 @@ Future<void> messageHandler(
       }
     }
   } catch (e) {
-    // sendDIDAuthFailedMessage(mnemonic, did, agent);
-    // agent.disconnect();
-    // throw Exception("Error in message handling: $e");
-    print(e);
+    sendDIDAuthFailedMessage(mnemonic, did, agent);
+    agent.disconnect();
+    throw Exception("Error in message handling: $e");
   }
 }
 
