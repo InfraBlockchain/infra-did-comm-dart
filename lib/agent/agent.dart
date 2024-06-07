@@ -119,8 +119,9 @@ class InfraDIDCommAgent {
 
   void setVPRequestCallback(
     Future<Map<String, dynamic>> Function(
-            List<RequestVC> requestVCs, String challenge)
-        callback,
+      List<RequestVC> requestVCs,
+      String challenge,
+    ) callback,
   ) {
     vpRequestCallback = callback;
   }
@@ -134,12 +135,14 @@ class InfraDIDCommAgent {
   }
 
   void setVPSubmitLaterCallback(
-      Function(SubmitVPLaterResponseMessage message) callback) {
+    Function(SubmitVPLaterResponseMessage message) callback,
+  ) {
     vpSubmitLaterCallback = callback;
   }
 
   void setVPRejectCallback(
-      Function(RejectRequestVPResponseMessage message) callback) {
+    Function(RejectRequestVPResponseMessage message) callback,
+  ) {
     vpRejectCallback = callback;
   }
 

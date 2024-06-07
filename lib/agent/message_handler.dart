@@ -202,7 +202,8 @@ Future<void> messageHandler(
           print("RejectReqVPRes Message Received");
           if (vpRejectCallback != null) {
             vpRejectCallback(
-                RejectRequestVPResponseMessage.fromJson(jwsPayload));
+              RejectRequestVPResponseMessage.fromJson(jwsPayload),
+            );
           }
         }
         if (jwsPayload["type"] == "VPSubmitLater") {
@@ -218,7 +219,8 @@ Future<void> messageHandler(
           print("SubmitVPLaterRes Message Received");
           if (vpSubmitLaterCallback != null) {
             vpSubmitLaterCallback(
-                SubmitVPLaterResponseMessage.fromJson(jwsPayload));
+              SubmitVPLaterResponseMessage.fromJson(jwsPayload),
+            );
           }
         }
       }
