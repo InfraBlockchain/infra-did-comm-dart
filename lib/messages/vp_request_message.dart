@@ -65,7 +65,7 @@ class VPRequestMessage {
       data["expiresTime"] = expiresTime;
       data["body"] = {
         "vcRequirements": vcRequirements.map((vc) => vc.toJson()).toList(),
-        "challenge": challenge
+        "challenge": challenge,
       };
       return data;
     } catch (e) {

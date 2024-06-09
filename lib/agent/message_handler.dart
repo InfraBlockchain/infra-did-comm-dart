@@ -35,6 +35,10 @@ Future<void> messageHandler(
     List<RequestVC> requestVCs,
     String challenge,
   )? vpRequestCallback,
+  bool Function(Map<String, dynamic> vp)? vpVerifyCallback,
+  Function(SubmitVPResponseMessage message)? vpSubmitResCallback,
+  Function(SubmitVPLaterResponseMessage message)? vpSubmitLaterResCallback,
+  Function(RejectRequestVPMessage message)? vpRejectCallback,
 ) async {
   try {
     Map<String, dynamic> header = extractJWEHeader(jwe);
@@ -161,6 +165,17 @@ Future<void> messageHandler(
             agent.vpChallenge,
           );
 
+          if (vpVerifyCallback != null) {
+            String jsonStringVP =
+                utf8.decode(base64Url.decode(jwsPayload["body"]["vp"]));
+            Map<String, dynamic> vp = json.decode(jsonStringVP);
+
+            bool customVerification = vpVerifyCallback(vp);
+            if (!customVerification) {
+              isVerified = false;
+            }
+          }
+
           await sendSubmitVPResponseMessage(
             mnemonic,
             did,
@@ -171,8 +186,16 @@ Future<void> messageHandler(
         }
         if (jwsPayload["type"] == "VPSubmitRes") {
           print("SubmitVPRes Message Received");
+          if (vpSubmitResCallback != null) {
+            vpSubmitResCallback(SubmitVPResponseMessage.fromJson(jwsPayload));
+          }
         }
         if (jwsPayload["type"] == "VPReqReject") {
+          if (vpRejectCallback != null) {
+            vpRejectCallback(
+              RejectRequestVPMessage.fromJson(jwsPayload),
+            );
+          }
           await sendRejectRequestVPResponseMessage(
             mnemonic,
             did,
@@ -194,14 +217,18 @@ Future<void> messageHandler(
         }
         if (jwsPayload["type"] == "VPSubmitLaterRes") {
           print("SubmitVPLaterRes Message Received");
+          if (vpSubmitLaterResCallback != null) {
+            vpSubmitLaterResCallback(
+              SubmitVPLaterResponseMessage.fromJson(jwsPayload),
+            );
+          }
         }
       }
     }
   } catch (e) {
-    // sendDIDAuthFailedMessage(mnemonic, did, agent);
-    // agent.disconnect();
-    // throw Exception("Error in message handling: $e");
-    print(e);
+    sendDIDAuthFailedMessage(mnemonic, did, agent);
+    agent.disconnect();
+    throw Exception("Error in message handling: $e");
   }
 }
 

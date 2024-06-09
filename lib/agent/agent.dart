@@ -4,7 +4,6 @@ import "package:convert/convert.dart";
 import "package:http/http.dart" as http;
 
 import "package:infra_did_comm_dart/agent/message_handler.dart";
-import "package:infra_did_comm_dart/messages/vp_request_message.dart";
 import "package:socket_io_client/socket_io_client.dart" as IO;
 import "package:uuid/uuid.dart";
 
@@ -34,6 +33,14 @@ class InfraDIDCommAgent {
   ) vpRequestCallback = (List<RequestVC> requestVCs, String challenge) {
     return Future.value({"status": "reject"});
   };
+  late bool Function(Map<String, dynamic> vp) vpVerifyCallback =
+      (Map<String, dynamic> vp) => true;
+  late Function(SubmitVPResponseMessage message) vpSubmitResCallback =
+      (SubmitVPResponseMessage message) {};
+  late Function(SubmitVPLaterResponseMessage message) vpSubmitLaterResCallback =
+      (SubmitVPLaterResponseMessage message) {};
+  late Function(RejectRequestVPMessage message) vpRejectCallback =
+      (RejectRequestVPMessage message) {};
 
   Completer<String?> _socketIdCompleter = Completer();
   Future<String?> get socketId => _socketIdCompleter.future;
@@ -112,10 +119,32 @@ class InfraDIDCommAgent {
 
   void setVPRequestCallback(
     Future<Map<String, dynamic>> Function(
-            List<RequestVC> requestVCs, String challenge)
-        callback,
+      List<RequestVC> requestVCs,
+      String challenge,
+    ) callback,
   ) {
     vpRequestCallback = callback;
+  }
+
+  void setVPVerifyCallback(bool Function(Map<String, dynamic> vp) callback) {
+    vpVerifyCallback = callback;
+  }
+
+  void setVPSubmitResCallback(
+      Function(SubmitVPResponseMessage message) callback) {
+    vpSubmitResCallback = callback;
+  }
+
+  void setVPSubmitLaterResCallback(
+    Function(SubmitVPLaterResponseMessage message) callback,
+  ) {
+    vpSubmitLaterResCallback = callback;
+  }
+
+  void setVPRejectCallback(
+    Function(RejectRequestVPMessage message) callback,
+  ) {
+    vpRejectCallback = callback;
   }
 
   void setVPLaterCallbackEndpoint(String vpLaterCallbackEndpoint) {
@@ -221,6 +250,10 @@ class InfraDIDCommAgent {
           didConnectedCallback,
           didAuthFailedCallback,
           vpRequestCallback,
+          vpVerifyCallback,
+          vpSubmitResCallback,
+          vpSubmitLaterResCallback,
+          vpRejectCallback,
         ),
       },
     );
