@@ -13,6 +13,7 @@ Feature provided by infra-did-comm-dart Library :
 -   Make shared key using ECDH-ES
 -   Connect to Websocket Server
 -   Make Dynamic QR Code
+-  Make VP Request Message
 
 ## Installation
 
@@ -129,8 +130,9 @@ initiatedByHolderScenario(String encoded) async {
 
   agent.init();
   await agent.sendDIDAuthInitMessage(encoded);
-  if(agent.isConnected){
-    print("DID Connected");
+  if (agent.isDIDConnected) {
+    print("DID is connected");
+    agent.sendVPRequestMessage([], "challenge");
   }
 }
 ```
