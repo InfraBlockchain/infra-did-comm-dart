@@ -26,7 +26,7 @@ dart pub add infra_did_comm_dart --git-url=https://github.com/InfraBlockchain/in
 
 ## Examples
 
-Get more examples in [examples](./examples) and [test](./test) folder.
+Get more examples in [example](./example) and [test](./test) folder.
 
 ### Holder & Verifier
 
