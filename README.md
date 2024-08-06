@@ -153,7 +153,7 @@ initiatedByHolderScenario(String encoded) async {
   await agent.sendDIDAuthInitMessage(encoded);
   if (agent.isDIDConnected) {
     print("DID is connected");
-    agent.sendVPRequestMessage([], "challenge");
+    agent.sendVPReq([], "challenge");
   }
 }
 ```

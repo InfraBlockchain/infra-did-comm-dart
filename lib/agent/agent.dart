@@ -159,13 +159,13 @@ class InfraDIDCommAgent {
   /// Initializes the agent with a connect request message and connects to the server.
   ///
   /// [encoded] - The encoded connect request message.
-  initWithConnectRequest(String encoded) async {
+  initReceivingConnectRequest(String encoded) async {
     await connect();
     sendDIDAuthInitMessage(encoded);
   }
 
   /// Initializes the agent with a static connect request message and connects to the server.
-  initWithStaticConnectRequest(
+  initReceivingStaticConnectRequest(
     String serviceEndpoint,
     Context context, {
     String? peerDID,
@@ -210,7 +210,7 @@ class InfraDIDCommAgent {
   /// [context] - The context object.
   /// [loopTimeSeconds] - The time interval in seconds between each loop iteration.
   /// [loopCallback] - The callback function that takes an encoded message as a parameter and is called in each loop iteration.
-  initWithDIDRequestMessageLoop(
+  initCreatingDynamicConnectRequest(
     Context context,
     int loopTimeSeconds,
     Function(String encodedMessage) loopCallback,
@@ -293,7 +293,7 @@ class InfraDIDCommAgent {
     print("DIDAuthInitMessage sent to $peerSocketId");
   }
 
-  Future<void> sendVPRequestMessage(
+  Future<void> sendVPReq(
     List<RequestVC> vcRequirements,
     String challenge,
   ) async {
@@ -324,7 +324,7 @@ class InfraDIDCommAgent {
       socket.emit("message", {"to": peerSocketId, "m": jwe});
       print("VPRequestMessage sent to $peerSocketId");
     } catch (e) {
-      throw Exception("Error in sendVPRequestMessage: $e");
+      throw Exception("Error in sendVPReq: $e");
     }
   }
 }
