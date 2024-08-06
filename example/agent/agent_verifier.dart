@@ -1,5 +1,3 @@
-import "dart:io";
-
 import "package:infra_did_comm_dart/infra_did_comm_dart.dart";
 
 bool didAuthCallback(String peerDID) {
@@ -64,7 +62,7 @@ initiatedByHolderScenario() async {
 
   if (agent.isDIDConnected) {
     print("DID is connected");
-    agent.sendVPRequestMessage([], "challenge");
+    agent.sendVPReq([], "challenge");
   }
 }
 
