@@ -64,7 +64,7 @@ initiatedByHolderScenario() async {
 
   if (agent.isDIDConnected) {
     print("DID is connected");
-    agent.sendVPRequestMessage([], "challenge");
+    agent.sendVPReq([], "challenge");
   }
 }
 

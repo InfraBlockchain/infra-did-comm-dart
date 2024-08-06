@@ -185,13 +185,13 @@ class _MyHomePageState extends State<MyHomePage> {
     agent.setVPRequestCallback(vpRejectCallback);
   }
 
-  Future<void> sendVPRequestMessage() async {
+  Future<void> sendVPReq() async {
     if (!agent.isDIDConnected) {
       print("DID is not connected");
       return;
     }
     List<RequestVC> requestVCs = [RequestVC(vcType: "test")];
-    agent.sendVPRequestMessage(requestVCs, "challenge");
+    agent.sendVPReq(requestVCs, "challenge");
   }
 
   @override
@@ -231,7 +231,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: setVPSubmitLaterCallback,
                 child: const Text("Set VP Submit Later Callback")),
             ElevatedButton(
-                onPressed: sendVPRequestMessage,
+                onPressed: sendVPReq,
                 child: const Text("Send VP Request Message")),
             ElevatedButton(
               onPressed: () {
@@ -338,7 +338,7 @@ class _MyHomePageState extends State<MyHomePage> {
         } else {
           var serviceEndpoint = decodedJson["serviceEndpoint"];
           var context = Context.fromJson(decodedJson["context"]);
-          await agent.initWithStaticConnectRequest(serviceEndpoint, context);
+          await agent.initReceivingStaticConnectRequest(serviceEndpoint, context);
         }
       }
     });
